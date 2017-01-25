@@ -239,7 +239,7 @@ $cp_php_notifier = new CP_PHP_Notifier();
 // create custom plugin settings menu
 add_action('admin_menu', 'my_cool_plugin_create_menu');
 
-function my_cool_plugin_create_menu() {
+function pn_create_menu() {
 
 	//create new top-level menu
 	add_menu_page('My Cool Plugin Settings', 'PHP Notifier', 'administrator', __FILE__, 'my_cool_plugin_settings_page' , plugins_url('/images/icon.png', __FILE__) );
@@ -249,14 +249,14 @@ function my_cool_plugin_create_menu() {
 }
 
 
-function register_my_cool_plugin_settings() {
+function pn_settings() {
 	//register our settings
 	register_setting( 'pn-email-enabled', 'new_option_name' );
 	register_setting( 'pn-periodic-emails', 'some_other_option' );
 	register_setting( 'pn-periodic-email-value', 'option_etc' );
 }
 
-function my_cool_plugin_settings_page() {
+function pn_settings_page() {
 ?>
 <div class="wrap">
 <h1>Your Plugin Name</h1>
