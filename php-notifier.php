@@ -237,7 +237,7 @@ $cp_php_notifier = new CP_PHP_Notifier();
 
 
 // create custom plugin settings menu
-add_action('admin_menu', 'my_cool_plugin_create_menu');
+add_action('admin_menu', 'pn_create_menu');
 
 function pn_create_menu() {
 
