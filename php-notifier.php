@@ -245,7 +245,7 @@ function pn_create_menu() {
 	add_menu_page('My Cool Plugin Settings', 'PHP Notifier', 'administrator', __FILE__, 'pn_settings_page' , plugins_url('/images/icon.png', __FILE__) );
 
 	//call register settings function
-	add_action( 'admin_init', 'register_my_cool_plugin_settings' );
+	add_action( 'admin_init', 'pn_settings' );
 }
 
 
@@ -259,7 +259,7 @@ function pn_settings() {
 function pn_settings_page() {
 ?>
 <div class="wrap">
-<h1>Your Plugin Name</h1>
+<h1>PHP Notifier</h1>
 
 <form method="post" action="options.php">
     <?php settings_fields( 'my-cool-plugin-settings-group' ); ?>
