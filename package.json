@@ -1,4 +1,7 @@
 {
+	"title": "PHP Notifier",
+	"author": "Code Parrots",
+	"site": "https://www.codeparrots.com",
   "name": "php-notifier",
   "version": "1.0.0",
   "description": "Notify users when the version of PHP running on their server has been or is about to be deprecated and will no longer be supported with security fixes.",
@@ -11,12 +14,25 @@
     "url": "git+https://github.com/CodeParrots/php-notifier.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPL v2+",
   "bugs": {
     "url": "https://github.com/CodeParrots/php-notifier/issues"
   },
   "homepage": "https://github.com/CodeParrots/php-notifier#readme",
+  "dependencies": {
+    "grunt": "^0.4.5"
+  },
   "devDependencies": {
-    "grunt": "^1.0.1"
+    "autoprefixer-core": "^5.2.1",
+    "grunt-auto-install": "^0.2.4",
+    "grunt-banner": "^0.6.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-cssmin": "^0.12.3",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "^0.9.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-postcss": "^0.5.0",
+    "grunt-zip-directories": "^0.1.3"
   }
 }

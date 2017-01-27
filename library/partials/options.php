@@ -8,9 +8,23 @@
  */
 class PHPNotifier_Settings {
 
+	/**
+	 * Options
+	 *
+	 * @var 1.0.0
+	 */
 	private $options;
 
-	public function __construct() {
+	/**
+	 * PHP Version
+	 *
+	 * @var 1.0.0
+	 */
+	private $php_version;
+
+	public function __construct( $php_version ) {
+
+		$this->php_version = $php_version;
 
 		add_action( 'admin_menu', [ $this, 'add_plugin_page' ] );
 
@@ -52,15 +66,22 @@ class PHPNotifier_Settings {
 
 				<form method="post" action="options.php">
 
-					<br />
-					<h2 class="php_notifier_version_title"> The PHP Version running on this server: <span class="php_notifier_version_number"> <?php echo phpversion(); ?> </span> </h2>
-					<br />
-					<br />
-
 					<?php
+
+						printf(
+							'<div class="notice notice-info"><p>%s</p></div>',
+							sprintf(
+								esc_html__( 'The PHP Version running on this server: %s' ),
+								wp_kses_post( '<span class="php-version">' . $this->php_version . '</span>' )
+							)
+						);
+
 						settings_fields( 'phpnotifier_settings_group' );
+
 						do_settings_sections( 'php-notifier' );
+
 						submit_button();
+
 					?>
 
 				</form>
@@ -120,7 +141,6 @@ class PHPNotifier_Settings {
 		$new_input = [];
 
 		$new_input['phpnotifier_send_email'] = isset( $input['phpnotifier_send_email'] ) ? absint( $input['phpnotifier_send_email'] ) : '';
-	/*	$new_input['pn_how_often']     = isset( $input['pn_how_often'] ) ? sanitize_text_field( $input['pn_how_often'] ) : ''; */
 		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
 		return $new_input;
@@ -169,6 +189,6 @@ class PHPNotifier_Settings {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHPNotifier_Settings();
+	$php_notifier_settings = new PHPNotifier_Settings( $this->php_version );
 
 }
