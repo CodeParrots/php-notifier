@@ -43,6 +43,7 @@ class CP_PHP_Notifier {
 
 		add_action( 'admin_init', [ $this, 'php_notifier_cross_check_data' ] );
 
+add_action( 'admin_enqueue_scripts', 'pn_styles' );
 	}
 
 	/**
@@ -227,6 +228,12 @@ class CP_PHP_Notifier {
 		return $php_version_info;
 
 	}
+
+}
+
+function pn_styles() {
+
+		wp_enqueue_style( 'pn-style', plugin_dir_url( __FILE__ ) . 'library/css/style.css');
 
 }
 
