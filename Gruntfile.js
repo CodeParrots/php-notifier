@@ -58,6 +58,43 @@ module.exports = function(grunt) {
       }
     },
 
+		replace: {
+			base_file: {
+				src: [ 'timeline-express.php' ],
+				overwrite: true,
+				replacements: [{
+					from: /Version: (.*)/,
+					to: "Version: <%= pkg.version %>"
+				},
+				{
+					from: /define\(\s*'PHP_NOTIFIER_VERSION',\s*'(.*)'\s*\);/,
+					to: "define( 'PHP_NOTIFIER_VERSION', '<%= pkg.version %>' );"
+				}]
+			},
+			readme_txt: {
+				src: [ 'readme.txt' ],
+				overwrite: true,
+				replacements: [{
+					from: /Stable tag: (.*)/,
+					to: "Stable tag: <%= pkg.version %>"
+				}]
+			},
+			readme_md: {
+				src: [ 'README.md' ],
+				overwrite: true,
+				replacements: [
+					{
+						from: /# PHP Notifier - (.*)/,
+						to: "# PHP Notifier - <%= pkg.version %>"
+					},
+					{
+						from: /\*\*Stable tag:\*\*        (.*)/,
+						to: "\**Stable tag:**        <%= pkg.version %> <br />"
+					}
+				]
+			}
+		},
+
 		// Generate a nice banner for our css/js files
 		usebanner: {
 	    taskName: {
@@ -140,6 +177,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks( 'grunt-banner' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-text-replace' );
 	grunt.loadNpmTasks( 'grunt-zip' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 
@@ -151,7 +189,12 @@ module.exports = function(grunt) {
 		'watch',
 	] );
 
+	grunt.registerTask( 'bump-version', [
+		'replace',
+	] );
+
 	grunt.registerTask( 'build', [
+		'replace',
 		'clean:build',
 		'copy',
 		'zip',
