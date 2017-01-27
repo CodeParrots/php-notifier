@@ -107,20 +107,27 @@ module.exports = function(grunt) {
 							'php-notifier.php',
 							'readme.txt'
 						],
-						dest: 'build/',
+						dest: 'build/php-notifier/',
 					},
 				],
 			},
 		},
 
-		clean: [
-			'build/*',
-		],
+		clean: {
+			build: [ 'build/*' ],
+			zip:   [
+				'build/php-notifier/',
+				'build/.DS_Store'
+			],
+		},
 
 		zip: {
 			'using-cwd': {
 				cwd: 'build/',
-				src: [ 'build/*' ],
+				src: [
+					'build/**/*',
+					'! build/.DS_Store'
+				],
 				dest: 'build/php-notifier-v<%= pkg.version %>.zip'
 			}
 		}
@@ -145,9 +152,10 @@ module.exports = function(grunt) {
 	] );
 
 	grunt.registerTask( 'build', [
-		'clean',
+		'clean:build',
 		'copy',
 		'zip',
+		'clean:zip',
 	] );
 
 };
