@@ -43,7 +43,7 @@ class CP_PHP_Notifier {
 
 		add_action( 'admin_init', [ $this, 'php_notifier_cross_check_data' ] );
 
-add_action( 'admin_enqueue_scripts', 'pn_styles' );
+add_action( 'admin_enqueue_scripts', 'php_notifier_styles' );
 	}
 
 	/**
@@ -231,9 +231,9 @@ add_action( 'admin_enqueue_scripts', 'pn_styles' );
 
 }
 
-function pn_styles() {
+function php_notifier_styles() {
 
-		wp_enqueue_style( 'pn-style', plugin_dir_url( __FILE__ ) . 'library/css/style.css');
+		wp_enqueue_style( 'php_notifier-style', plugin_dir_url( __FILE__ ) . 'library/css/style.css');
 
 }
 

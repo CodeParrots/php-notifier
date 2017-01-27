@@ -53,9 +53,7 @@ class PHPNotifier_Settings {
 				<form method="post" action="options.php">
 
 					<br />
-
-					<h1 class="pn_version_title"> This server runs PHP version <?php echo phpversion();?></h1>
-
+					<h2 class="php_notifier_version_title"> The PHP Version running on this server: <span class="php_notifier_version_number"> <?php echo phpversion(); ?> </span> </h2>
 					<br />
 					<br />
 
@@ -93,17 +91,17 @@ class PHPNotifier_Settings {
 		);
 
 		add_settings_field(
-			'pn_send_email',
+			'php_notifier_send_email',
 			__( 'Send Email Notification?', 'php-notifier' ),
-			[ $this, 'pn_send_email_callback' ],
+			[ $this, 'php_notifier_send_email_callback' ],
 			'php-notifier',
 			'setting_section_id'
 		);
 
 		add_settings_field(
-			'pn_how_often',
+			'php_notifier_how_often',
 			__( 'How Often?<br />\'Never\', \'Daily\', \'Weekly\', \'Monthly\', \'On Update\',', 'php-notifier' ),
-			[ $this, 'pn_how_often_callback' ],
+			[ $this, 'php_notifier_how_often_callback' ],
 			'php-notifier',
 			'setting_section_id'
 		);
@@ -123,7 +121,7 @@ class PHPNotifier_Settings {
 
 		$new_input['phpnotifier_send_email'] = isset( $input['phpnotifier_send_email'] ) ? absint( $input['phpnotifier_send_email'] ) : '';
 	/*	$new_input['pn_how_often']     = isset( $input['pn_how_often'] ) ? sanitize_text_field( $input['pn_how_often'] ) : ''; */
-		$new_input['pn_how_often'] = empty( $input['pn_how_often'] ) ? 'Never' : absint( $input['pn_how_often'] );
+		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
 		return $new_input;
 
@@ -145,7 +143,7 @@ class PHPNotifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function pn_send_email_callback() {
+	public function php_notifier_send_email_callback() {
 
 		printf(
 			'<input type="text" id="phpnotifier_send_email" name="phpnotifier_settings[phpnotifier_send_email]" value="%s" />',
@@ -159,11 +157,11 @@ class PHPNotifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function pn_how_often_callback() {
+	public function php_notifier_how_often_callback() {
 
 		printf(
-			'<input type="text" id="pn_how_often" name="phpnotifier_settings[pn_how_often]" value="%s" />',
-			isset( $this->options['pn_how_often'] ) ? esc_attr( $this->options['pn_how_often'] ) : ''
+			'<input type="text" id="pn_how_often" name="phpnotifier_settings[php_notifier_how_often]" value="%s" />',
+			isset( $this->options['php_notifier_how_often'] ) ? esc_attr( $this->options['php_notifier_how_often'] ) : ''
 		);
 
 	}
