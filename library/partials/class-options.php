@@ -6,7 +6,7 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHPNotifier_Settings {
+class PHP_Notifier_Settings {
 
 	/**
 	 * Options
@@ -29,6 +29,8 @@ class PHPNotifier_Settings {
 		add_action( 'admin_menu', [ $this, 'add_plugin_page' ] );
 
 		add_action( 'admin_init', [ $this, 'page_init' ] );
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'page_styles' ] );
 
 	}
 
@@ -56,7 +58,7 @@ class PHPNotifier_Settings {
 	*/
 	public function create_admin_page() {
 
-		$this->options = get_option( 'phpnotifier_settings' );
+		$this->options = get_option( 'php_notifier_settings' );
 
 		?>
 
@@ -71,12 +73,12 @@ class PHPNotifier_Settings {
 						printf(
 							'<div class="notice notice-info"><p>%s</p></div>',
 							sprintf(
-								esc_html__( 'The PHP Version running on this server: %s' ),
+								esc_html__( 'The PHP version running on this server: %s' ),
 								wp_kses_post( '<span class="php-version">' . $this->php_version . '</span>' )
 							)
 						);
 
-						settings_fields( 'phpnotifier_settings_group' );
+						settings_fields( 'php_notifier_settings_group' );
 
 						do_settings_sections( 'php-notifier' );
 
@@ -99,8 +101,8 @@ class PHPNotifier_Settings {
 	public function page_init() {
 
 		register_setting(
-			'phpnotifier_settings_group',
-			'phpnotifier_settings',
+			'php_notifier_settings_group',
+			'php_notifier_settings',
 			[ $this, 'sanitize' ]
 		);
 
@@ -130,6 +132,19 @@ class PHPNotifier_Settings {
 	}
 
 	/**
+	 * Enqueue the admin stylesheet
+	 *
+	 * @since 1.0.0
+	 */
+	public function page_styles() {
+
+		$suffix = SCRIPT_DEBUG ? '' : '.min';
+
+		wp_enqueue_style( 'php-notifier-style', PHP_NOTIFIER_URL . "library/css/style{$suffix}.css", [], PHP_NOTIFIER_VERSION, 'all' );
+
+	}
+
+	/**
 	* Sanitize each setting field as needed
 	*
 	* @param array $input Contains all settings fields as array keys
@@ -140,7 +155,7 @@ class PHPNotifier_Settings {
 
 		$new_input = [];
 
-		$new_input['phpnotifier_send_email'] = isset( $input['phpnotifier_send_email'] ) ? absint( $input['phpnotifier_send_email'] ) : '';
+		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? absint( $input['php_notifier_send_email'] ) : '';
 		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
 		return $new_input;
@@ -166,8 +181,8 @@ class PHPNotifier_Settings {
 	public function php_notifier_send_email_callback() {
 
 		printf(
-			'<input type="text" id="phpnotifier_send_email" name="phpnotifier_settings[phpnotifier_send_email]" value="%s" />',
-			isset( $this->options['phpnotifier_send_email'] ) ? esc_attr( $this->options['phpnotifier_send_email'] ) : ''
+			'<input type="text" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="%s" />',
+			isset( $this->options['php_notifier_send_email'] ) ? esc_attr( $this->options['php_notifier_send_email'] ) : ''
 		);
 
 	}
@@ -180,7 +195,7 @@ class PHPNotifier_Settings {
 	public function php_notifier_how_often_callback() {
 
 		printf(
-			'<input type="text" id="phpnotifier_how_often" name="phpnotifier_settings[php_notifier_how_often]" value="%s" />',
+			'<input type="text" id="php_notifier_how_often" name="php_notifier_settings[php_notifier_how_often]" value="%s" />',
 			isset( $this->options['php_notifier_how_often'] ) ? esc_attr( $this->options['php_notifier_how_often'] ) : ''
 		);
 
@@ -189,6 +204,6 @@ class PHPNotifier_Settings {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHPNotifier_Settings( $this->php_version );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version );
 
 }

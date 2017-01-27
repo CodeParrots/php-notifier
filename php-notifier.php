@@ -35,15 +35,30 @@ class CP_PHP_Notifier {
 
 	public function __construct() {
 
+		define( 'PHP_NOTIFIER_PATH', plugin_dir_path( __FILE__ ) );
+		define( 'PHP_NOTIFIER_URL', plugin_dir_url( __FILE__ ) );
+		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
+
 		$this->php_version = phpversion();
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
-		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/options.php' );
+		$this->init();
+
+	}
+
+	/**
+	 * Initialize the plugin
+	 *
+	 * @since 1.0.0
+	 */
+	public function init() {
 
 		add_action( 'admin_init', [ $this, 'php_notifier_cross_check_data' ] );
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'php_notifier_styles' ] );
+		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-options.php' );
+
+		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-filters.php' );
 
 	}
 
@@ -227,19 +242,6 @@ class CP_PHP_Notifier {
 		}
 
 		return $php_version_info;
-
-	}
-
-	/**
-	 * Enqueue the admin stylesheet
-	 *
-	 * @since 1.0.0
-	 */
-	public function php_notifier_styles() {
-
-		$suffix = SCRIPT_DEBUG ? '' : '.min';
-
-		wp_enqueue_style( 'php_notifier-style', plugin_dir_url( __FILE__ ) . "library/css/style{$suffix}.css" );
 
 	}
 
