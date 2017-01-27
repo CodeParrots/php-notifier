@@ -1,0 +1,22 @@
+{
+  "name": "php-notifier",
+  "version": "1.0.0",
+  "description": "Notify users when the version of PHP running on their server has been or is about to be deprecated and will no longer be supported with security fixes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeParrots/php-notifier.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CodeParrots/php-notifier/issues"
+  },
+  "homepage": "https://github.com/CodeParrots/php-notifier#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1"
+  }
+}
