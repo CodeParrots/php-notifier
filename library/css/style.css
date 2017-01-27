@@ -1,6 +1,7 @@
 .php_notifier_version_title {
 	padding: 1em 1em;
 	background: white;
+	border-left: solid #008EC2 2px;
 }
 
 .php_notifier_version_number {

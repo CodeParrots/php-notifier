@@ -160,7 +160,7 @@ class PHPNotifier_Settings {
 	public function php_notifier_how_often_callback() {
 
 		printf(
-			'<input type="text" id="pn_how_often" name="phpnotifier_settings[php_notifier_how_often]" value="%s" />',
+			'<input type="text" id="phpnotifier_how_often" name="phpnotifier_settings[php_notifier_how_often]" value="%s" />',
 			isset( $this->options['php_notifier_how_often'] ) ? esc_attr( $this->options['php_notifier_how_often'] ) : ''
 		);
 
