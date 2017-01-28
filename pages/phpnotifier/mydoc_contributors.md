@@ -4,7 +4,7 @@ permalink: contributors.html
 sidebar: phpnotifier_sidebar
 tags: [special_layouts]
 keywords: contributors
-last_updated: January 27th 2017
+last_updated: January 28th 2017
 summary: "You can use an accordion-layout that takes advantage of Bootstrap styling. This is useful for an FAQ page."
 toc: false
 folder: mydoc
