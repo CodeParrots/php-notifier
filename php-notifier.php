@@ -45,6 +45,8 @@ class CP_PHP_Notifier {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'php_notifier_styles' ] );
 
+
+
 	}
 
 	/**

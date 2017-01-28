@@ -166,9 +166,15 @@ class PHPNotifier_Settings {
 	public function php_notifier_send_email_callback() {
 
 		printf(
-			'<input type="text" id="phpnotifier_send_email" name="phpnotifier_settings[phpnotifier_send_email]" value="%s" />',
-			isset( $this->options['phpnotifier_send_email'] ) ? esc_attr( $this->options['phpnotifier_send_email'] ) : ''
+			'<input type="checkbox" id="phpnotifier_send_email" name="phpnotifier_settings[phpnotifier_send_email]" value="1" %s />',
+			checked( 1, $this->options['phpnotifier_send_email'] )
 		);
+
+		if ( $this->options['phpnotifier_send_email'] == 1 ) {
+
+			$message = 'The version of php running on the server hosting ' . get_site_url() . ' is PHP '  . $this->php_version . '.' . 'PHP ' . $this->php_version .' is _still supported/not supported_.  ';
+			wp_mail( 'email@recip.com', 'PHP Notifier Update',  $message );
+		}
 
 	}
 
