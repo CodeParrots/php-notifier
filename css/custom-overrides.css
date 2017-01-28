@@ -1,0 +1,11 @@
+/**
+ * Custom Overrides
+ */
+li.sidebarTitle {
+	color: #72ac4a;
+}
+
+.footer-logo {
+	width: 225px;
+	margin-top: 1em;
+}
