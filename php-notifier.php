@@ -113,7 +113,7 @@ class CP_PHP_Notifier {
 
 				return;
 
-			} // @codingStandardsIgnoreLine
+			}
 
 			// PHP Version will not actively be supported in 1 month or less
 			if ( strtotime( '+1 month' ) >= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] ) {
