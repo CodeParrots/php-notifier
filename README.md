@@ -2,12 +2,12 @@
 
 Notify users when the version of PHP running on their server has been or is about to be deprecated and will no longer be supported with security fixes.
 
-**Contributors:** codeparrots, eherman24, brothman01
-**Tags:** [php](https://wordpress.org/plugins/tags/php), [version](https://wordpress.org/plugins/tags/version), [notifier](https://wordpress.org/plugins/tags/notifier), [notice](https://wordpress.org/plugins/tags/notice), [deprecated](https://wordpress.org/plugins/tags/deprecated), [alert](https://wordpress.org/plugins/tags/alert), [email](https://wordpress.org/plugins/tags/email)
-**Requires at least:** 4.4
-**Tested up to:** 4.7.2
-**Stable tag:** 1.0.0
-**License:** [GPL-2.0](https://www.gnu.org/licenses/gpl-2.0.html)
+**Contributors:** codeparrots, eherman24, brothman01 <br />
+**Tags:** [php](https://wordpress.org/plugins/tags/php), [version](https://wordpress.org/plugins/tags/version), [notifier](https://wordpress.org/plugins/tags/notifier), [notice](https://wordpress.org/plugins/tags/notice), [deprecated](https://wordpress.org/plugins/tags/deprecated), [alert](https://wordpress.org/plugins/tags/alert), [email](https://wordpress.org/plugins/tags/email) <br />
+**Requires at least:** 4.4 <br />
+**Tested up to:** 4.7.2 <br />
+**Stable tag:** 1.0.0 <br />
+**License:** [GPL-2.0](https://www.gnu.org/licenses/gpl-2.0.html) <br />
 
 ### Filters ###
 

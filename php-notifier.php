@@ -75,6 +75,7 @@ class CP_PHP_Notifier {
 
 		}
 
+
 		// PHP Version is deprecated
 		//  - Less than last PHP version supported
 		//  - Current time is greater than or equal to "Security Support Until"
@@ -116,7 +117,9 @@ class CP_PHP_Notifier {
 
 				$this->php_version_error();
 
-			} // @codingStandardsIgnoreLine
+			}
+
+			$this->warning_type = false;
 
 		}
 
@@ -128,6 +131,12 @@ class CP_PHP_Notifier {
 	 * @return mixed
 	 */
 	public function php_version_error( $echo = true ) {
+
+		if ( ! $this->warning_type ) {
+
+			return;
+
+		}
 
 		$type = 'error';
 
@@ -186,7 +195,11 @@ class CP_PHP_Notifier {
 	 */
 	public function php_notifier_version_info() {
 
-		delete_transient( 'php_notifier_verison_info' );
+		if ( WP_DEBUG ) {
+
+			delete_transient( 'php_notifier_verison_info' );
+
+		}
 
 		if ( WP_DEBUG || false === ( $php_version_info = get_transient( 'php_notifier_verison_info' ) ) ) {
 
