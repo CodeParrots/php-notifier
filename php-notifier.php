@@ -39,7 +39,7 @@ class CP_PHP_Notifier {
 		define( 'PHP_NOTIFIER_URL', plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
-		$this->php_version = '5.4.0';//phpversion();
+		$this->php_version = phpversion();
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
