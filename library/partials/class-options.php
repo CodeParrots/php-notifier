@@ -38,6 +38,8 @@ class PHP_Notifier_Settings {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'page_styles' ] );
 
+		print_r( 'the value:' . $this->options['php_notifier_send_email'] );
+
 	}
 
 	/**
@@ -141,7 +143,7 @@ class PHP_Notifier_Settings {
 
 		add_settings_field(
 			'php_notifier_how_often',
-			__( 'How Often?<br />\'Never\', \'Daily\', \'Weekly\', \'Monthly\', \'On Update\',', 'php-notifier' ),
+			__( 'How Often? <br /> <span style="font-weight: 400;" >\'Never\', \'Daily\', \'Weekly\', \'Monthly\', \'On Update\'</span>', 'php-notifier' ),
 			[ $this, 'php_notifier_how_often_callback' ],
 			'php-notifier',
 			'setting_section_id'
@@ -173,7 +175,7 @@ class PHP_Notifier_Settings {
 
 		$new_input = [];
 
-		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? absint( $input['php_notifier_send_email'] ) : '';
+		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? $input['php_notifier_send_email'] : '';
 		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
 		$this->email_cron();
@@ -201,9 +203,9 @@ class PHP_Notifier_Settings {
 	public function php_notifier_send_email_callback() {
 
 		printf(
-			'<input type="text" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="%s" />',
-			isset( $this->options['php_notifier_send_email'] ) ? esc_attr( $this->options['php_notifier_send_email'] ) : ''
-		);
+					'<input type="checkbox" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="1" %s />',
+					checked( 1, $this->options['php_notifier_send_email'], false )
+				);
 
 	}
 
