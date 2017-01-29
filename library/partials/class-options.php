@@ -22,11 +22,16 @@ class PHP_Notifier_Settings {
 	 */
 	private $php_version;
 
+	/**
+	 * PHP Version Error
+	 *
+	 * @var 1.0.0
+	 */
 	private $php_version_error;
 
-	public function __construct( $php_version, $php_version_error ) {
+	public function __construct( $options, $php_version, $php_version_error ) {
 
-		$this->options = get_option( 'php_notifier_settings' );
+		$this->options = $options;
 
 		$this->php_version = $php_version;
 
@@ -64,7 +69,7 @@ class PHP_Notifier_Settings {
 	 */
 	public function email_cron() {
 
-		if ( ! $this->options['php_notifier_send_email'] ) {
+		if ( ! $this->options['send_email'] ) {
 
 			return;
 
@@ -137,17 +142,17 @@ class PHP_Notifier_Settings {
 		);
 
 		add_settings_field(
-			'php_notifier_send_email',
-			__( 'Send Email Notification?', 'php-notifier' ),
-			[ $this, 'php_notifier_send_email_callback' ],
+			'send_email',
+			esc_html__( 'Send Email Notification?', 'php-notifier' ),
+			[ $this, 'send_email_callback' ],
 			'php-notifier',
 			'setting_section_id'
 		);
 
 		add_settings_field(
-			'php_notifier_how_often',
-			__( 'How Often? <br /> <span style="font-weight: 400;" >\'Never\', \'Daily\', \'Weekly\', \'Monthly\', \'On Update\'</span>', 'php-notifier' ),
-			[ $this, 'php_notifier_how_often_callback' ],
+			'email_frequency',
+			esc_html__( 'Email Frequency', 'php-notifier' ),
+			[ $this, 'email_frequency_callback' ],
 			'php-notifier',
 			'setting_section_id'
 		);
@@ -178,8 +183,9 @@ class PHP_Notifier_Settings {
 
 		$new_input = [];
 
-		$new_input['php_notifier_send_email'] = (bool) isset( $input['php_notifier_send_email'] ) ? true : false;
-		$new_input['php_notifier_how_often']  = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
+		$new_input['warning_type']     = $this->options['warning_type'];
+		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
+		$new_input['email_frequency']  = isset( $input['email_frequency'] ) ? sanitize_text_field( $input['email_frequency'] ) : 'Never';
 
 		$this->email_cron();
 
@@ -203,11 +209,11 @@ class PHP_Notifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function php_notifier_send_email_callback() {
+	public function send_email_callback() {
 
 		printf(
-			'<input type="checkbox" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="1" %s />',
-			checked( 1, $this->options['php_notifier_send_email'], false )
+			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
+			checked( 1, $this->options['send_email'], false )
 		);
 
 	}
@@ -217,18 +223,35 @@ class PHP_Notifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function php_notifier_how_often_callback() {
+	public function email_frequency_callback() {
 
-		printf(
-			'<input type="text" id="php_notifier_how_often" name="php_notifier_settings[php_notifier_how_often]" value="%s" />',
-			isset( $this->options['php_notifier_how_often'] ) ? esc_attr( $this->options['php_notifier_how_often'] ) : ''
-		);
+		$options = [
+			'never'   => __( 'Never', 'php-notifier' ),
+			'daily'   => __( 'Daily', 'php-notifier' ),
+			'weekly'  => __( 'Weekly', 'php-notifier' ),
+			'monthly' => __( 'Monthly', 'php-notifier' ),
+		];
+
+		print( '<select name="php_notifier_settings[email_frequency]">' );
+
+		foreach ( $options as $value => $label ) {
+
+			printf(
+				'<option value="%1$s" %2$s>%3$s</option>',
+				esc_attr( $value ),
+				selected( $this->options['email_frequency'], $value ),
+				esc_html( $label )
+			);
+
+		}
+
+		print( '</select>' );
 
 	}
 }
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version, $this->php_version_error( false ) );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->options, $this->php_version, $this->php_version_error( false ) );
 
 }

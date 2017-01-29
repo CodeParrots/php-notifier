@@ -27,11 +27,11 @@ class CP_PHP_Notifier {
 	private $php_support_data;
 
 	/**
-	 * Warning type
+	 * PHP Notifier Settings Array
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $warning_type;
+	private $options;
 
 	public function __construct() {
 
@@ -42,6 +42,12 @@ class CP_PHP_Notifier {
 		$this->php_version = phpversion();
 
 		$this->php_support_data = $this->php_notifier_version_info();
+
+		$this->options = get_option( 'php_notifier_settings', [
+			'send_email'      => true,
+			'email_frequency' => 'monthly',
+			'warning_type'    => false,
+		] );
 
 		$this->init();
 
@@ -83,7 +89,7 @@ class CP_PHP_Notifier {
 			strtotime( 'now' ) >= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until']
 		) {
 
-			$this->warning_type = 'deprecated';
+			$this->set_warning_type( 'deprecated' );
 
 			$this->php_version_error();
 
@@ -101,7 +107,7 @@ class CP_PHP_Notifier {
 				strtotime( 'now' ) <= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until']
 			) {
 
-				$this->warning_type = 'unsupported';
+				$this->set_warning_type( 'unsupported' );
 
 				$this->php_version_error();
 
@@ -112,15 +118,37 @@ class CP_PHP_Notifier {
 			// PHP Version will not actively be supported in 1 month or less
 			if ( strtotime( '+1 month' ) >= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] ) {
 
-				$this->warning_type = 'deprecated-soon';
+				$this->set_warning_type( 'deprecated-soon' );
 
 				$this->php_version_error();
 
 			}
 
-			$this->warning_type = false;
+			$this->set_warning_type( false );
 
 		}
+
+	}
+
+	/**
+	 * Set the warning type
+	 *
+	 * @param string $type The type of warning
+	 *        possible: deprecated, unsupported, deprecated-soon
+	 *
+	 * @since 1.0.0
+	 */
+	public function set_warning_type( $type = false ) {
+
+		if ( ! isset( $this->options['warning_type'] ) ) {
+
+			return;
+
+		}
+
+		$this->options['warning_type'] = $type;
+
+		update_option( 'php_notifier_settings', $this->options );
 
 	}
 
@@ -131,7 +159,7 @@ class CP_PHP_Notifier {
 	 */
 	public function php_version_error( $echo = true ) {
 
-		if ( ! $this->warning_type ) {
+		if ( ! $this->options['warning_type'] ) {
 
 			return;
 
@@ -139,7 +167,7 @@ class CP_PHP_Notifier {
 
 		$type = 'error';
 
-		switch ( $this->warning_type ) {
+		switch ( $this->options['warning_type'] ) {
 
 			default:
 			case 'deprecated':
