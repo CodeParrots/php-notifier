@@ -5,7 +5,7 @@ Notify users when the version of PHP running on their server has been or is abou
 **Contributors:** codeparrots, eherman24, brothman01 <br />
 **Tags:** [php](https://wordpress.org/plugins/tags/php), [version](https://wordpress.org/plugins/tags/version), [notifier](https://wordpress.org/plugins/tags/notifier), [notice](https://wordpress.org/plugins/tags/notice), [deprecated](https://wordpress.org/plugins/tags/deprecated), [alert](https://wordpress.org/plugins/tags/alert), [email](https://wordpress.org/plugins/tags/email) <br />
 **Requires at least:** 4.4 <br />
-**Tested up to:** 4.7.2 <br />
+**Tested up to:** WordPress v4.7.2 <br />
 **Stable tag:** 1.0.0 <br />
 **License:** [GPL-2.0](https://www.gnu.org/licenses/gpl-2.0.html) <br />
 

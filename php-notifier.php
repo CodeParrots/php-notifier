@@ -75,7 +75,6 @@ class CP_PHP_Notifier {
 
 		}
 
-
 		// PHP Version is deprecated
 		//  - Less than last PHP version supported
 		//  - Current time is greater than or equal to "Security Support Until"
