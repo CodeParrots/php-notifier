@@ -35,8 +35,8 @@ class CP_PHP_Notifier {
 
 	public function __construct() {
 
-		define( 'PHP_NOTIFIER_PATH', plugin_dir_path( __FILE__ ) );
-		define( 'PHP_NOTIFIER_URL', plugin_dir_url( __FILE__ ) );
+		define( 'PHP_NOTIFIER_PATH',    plugin_dir_path( __FILE__ ) );
+		define( 'PHP_NOTIFIER_URL',     plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
 		$this->php_version = phpversion();
@@ -129,7 +129,6 @@ class CP_PHP_Notifier {
 	 */
 	public function php_version_error( $echo = true ) {
 
-
 		$type = 'error';
 
 		switch ( $this->warning_type ) {
@@ -199,7 +198,7 @@ class CP_PHP_Notifier {
 
 			}
 
-			$body = wp_remote_retrieve_body( $contents );
+			$body = str_replace( '<link rel="shortcut icon" href="http://php.net/favicon.ico">', '', wp_remote_retrieve_body( $contents ) );
 
 			$dom = new DOMDocument;
 

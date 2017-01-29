@@ -38,8 +38,6 @@ class PHP_Notifier_Settings {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'page_styles' ] );
 
-		print_r( 'the value:' . $this->options['php_notifier_send_email'] );
-
 	}
 
 	/**
@@ -59,9 +57,14 @@ class PHP_Notifier_Settings {
 
 	}
 
+	/**
+	 * Send the PHP info email.
+	 *
+	 * @return bool
+	 */
 	public function email_cron() {
 
-		if ( 1 !== $this->options['php_notifier_send_email'] ) {
+		if ( ! $this->options['php_notifier_send_email'] ) {
 
 			return;
 
@@ -175,8 +178,8 @@ class PHP_Notifier_Settings {
 
 		$new_input = [];
 
-		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? $input['php_notifier_send_email'] : '';
-		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
+		$new_input['php_notifier_send_email'] = (bool) isset( $input['php_notifier_send_email'] ) ? true : false;
+		$new_input['php_notifier_how_often']  = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
 		$this->email_cron();
 
@@ -203,9 +206,9 @@ class PHP_Notifier_Settings {
 	public function php_notifier_send_email_callback() {
 
 		printf(
-					'<input type="checkbox" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="1" %s />',
-					checked( 1, $this->options['php_notifier_send_email'], false )
-				);
+			'<input type="checkbox" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="1" %s />',
+			checked( 1, $this->options['php_notifier_send_email'], false )
+		);
 
 	}
 
