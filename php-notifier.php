@@ -39,7 +39,7 @@ class CP_PHP_Notifier {
 		define( 'PHP_NOTIFIER_URL', plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
-		$this->php_version = phpversion();
+		$this->php_version = '5.4.0';//phpversion();
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
@@ -85,7 +85,7 @@ class CP_PHP_Notifier {
 
 			$this->warning_type = 'deprecated';
 
-			add_action( 'admin_notices', [ $this, 'php_version_error' ] );
+			$this->php_version_error();
 
 			return;
 
@@ -103,7 +103,7 @@ class CP_PHP_Notifier {
 
 				$this->warning_type = 'unsupported';
 
-				add_action( 'admin_notices', [ $this, 'php_version_error' ] );
+				$this->php_version_error();
 
 				return;
 
@@ -114,7 +114,7 @@ class CP_PHP_Notifier {
 
 				$this->warning_type = 'deprecated-soon';
 
-				add_action( 'admin_notices', [ $this, 'php_version_error' ] );
+				$this->php_version_error();
 
 			} // @codingStandardsIgnoreLine
 
@@ -127,7 +127,8 @@ class CP_PHP_Notifier {
 	 *
 	 * @return mixed
 	 */
-	public function php_version_error() {
+	public function php_version_error( $echo = true ) {
+
 
 		$type = 'error';
 
@@ -156,7 +157,7 @@ class CP_PHP_Notifier {
 
 		}
 
-		printf(
+		$notice = sprintf(
 			'<div class="notice notice-%1$s">
 				<p>%2$s</p>
 			</div>',
@@ -166,6 +167,16 @@ class CP_PHP_Notifier {
 				wp_kses_post( '<strong>v' . $this->php_version . '</strong>' )
 			)
 		);
+
+		if ( $echo ) {
+
+			echo $notice;
+
+			return;
+
+		}
+
+		return $notice;
 
 	}
 

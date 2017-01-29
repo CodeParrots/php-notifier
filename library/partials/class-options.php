@@ -22,9 +22,15 @@ class PHP_Notifier_Settings {
 	 */
 	private $php_version;
 
-	public function __construct( $php_version ) {
+	private $php_version_error;
+
+	public function __construct( $php_version, $php_version_error ) {
+
+		$this->options = get_option( 'php_notifier_settings' );
 
 		$this->php_version = $php_version;
+
+		$this->php_version_error = $php_version_error;
 
 		add_action( 'admin_menu', [ $this, 'add_plugin_page' ] );
 
@@ -51,14 +57,26 @@ class PHP_Notifier_Settings {
 
 	}
 
+	public function email_cron() {
+
+		if ( 1 !== $this->options['php_notifier_send_email'] ) {
+
+			return;
+
+		}
+
+		$message = 'The version of PHP running on the server hosting ' . get_site_url() . ' is PHP ' . $this->php_version . ".\r\n" . wp_strip_all_tags( $this->php_version_error );
+
+		wp_mail( get_option( 'admin_email' ), 'PHP Notifier Update',  $message );
+
+	}
+
 	/**
 	* Options page callback
 	*
 	* @since 1.0.0
 	*/
 	public function create_admin_page() {
-
-		$this->options = get_option( 'php_notifier_settings' );
 
 		?>
 
@@ -158,6 +176,8 @@ class PHP_Notifier_Settings {
 		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? absint( $input['php_notifier_send_email'] ) : '';
 		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
 
+		$this->email_cron();
+
 		return $new_input;
 
 	}
@@ -204,6 +224,6 @@ class PHP_Notifier_Settings {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version, $this->php_version_error( false ) );
 
 }
