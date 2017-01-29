@@ -85,12 +85,14 @@ module.exports = function( grunt ) {
 
 	require( 'matchdep' ).filterDev( 'grunt-*' ).forEach( grunt.loadNpmTasks );
 
-	grunt.registerTask( 'default', [ 'shell:build', 'autoprefixer', 'replace', 'cssmin' ] );
+	grunt.registerTask( 'default', [ 'menu' ] );
 
-	grunt.registerTask( 'version', [ 'replace' ] );
+	grunt.registerTask( 'Run Grunt.js Tasks', 'Build the site documentation.', [ 'shell:build', 'autoprefixer', 'replace', 'cssmin' ] );
 
-	grunt.registerTask( 'build', [ 'shell:build', 'replace' ] );
+	grunt.registerTask( 'Update Documentation Version', 'Bump the documentation version.', [ 'replace' ] );
 
-	grunt.registerTask( 'deploy', [ 'shell:build', 'replace', 'shell:deploy' ] );
+	grunt.registerTask( 'Build Documentation', 'Build the documentation for previewing.', [ 'shell:build', 'replace' ] );
+
+	grunt.registerTask( 'Deploy Documentation', 'Deploy the documentation to the github site.', [ 'shell:build', 'replace', 'shell:deploy' ] );
 
 };
