@@ -75,7 +75,9 @@ class PHP_Notifier_Settings {
 
 		}
 
-		$message = 'The version of PHP running on the server hosting ' . get_site_url() . ' is PHP ' . $this->php_version . ".\r\n" . wp_strip_all_tags( $this->php_version_error );
+		$error_message = '' !== wp_strip_all_tags( $this->php_version_error ) ? wp_strip_all_tags( $this->php_version_error ) : 'You are running a supported version of PHP.';
+
+		$message = 'The version of PHP running on the server hosting ' . get_site_url() . ' is PHP ' . $this->php_version . ".\r\n" . $error_message;
 
 		wp_mail( get_option( 'admin_email' ), 'PHP Notifier Update', $message );
 
