@@ -74,7 +74,7 @@ class PHP_Notifier_Settings {
 			return;
 
 		}
-
+ 
 		$error_message = ! $this->php_version_error ? sprintf( __( '%s You are running a supported version of PHP.', 'php-notifier' ), '☑' ) : '☒ ' . wp_strip_all_tags( $this->php_version_error );
 
 		$message = sprintf(
