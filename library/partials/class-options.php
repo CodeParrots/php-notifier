@@ -77,13 +77,13 @@ public function email_cron() {
 
 	}
 
-	if ( 'Never' == $this->options['send_email'] ) {
+	if ( 'Never' == $this->options['email_frequency'] ) {
 
 			return;
 
 	}
 
-	if ( wp_next_scheduled( 'php_notifier_email' ) !== '' || wp_next_scheduled( 'php_notifier_email' ) !== $this->options['send_email'] ) {
+	if ( wp_next_scheduled( 'php_notifier_email' ) !== '' || wp_next_scheduled( 'php_notifier_email' ) !== $this->options['email_frequency'] ) {
 
 			wp_schedule_event( time(), $this->options['send_email'], 'php_notifier_email_hook' );
 
@@ -112,7 +112,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function create_admin_page() {
+	function create_admin_page() {
 
 		?>
 
@@ -152,7 +152,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function page_init() {
+	function page_init() {
 
 		register_setting(
 			'php_notifier_settings_group',
@@ -190,7 +190,7 @@ public function send_email() {
 	 *
 	 * @since 1.0.0
 	 */
-	public function page_styles() {
+	 function page_styles() {
 
 		$suffix = SCRIPT_DEBUG ? '' : '.min';
 
@@ -205,7 +205,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function sanitize( $input ) {
+	 function sanitize( $input ) {
 
 		$new_input = [];
 
@@ -224,7 +224,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function print_section_info() {
+	 function print_section_info() {
 
 		esc_html_e( 'Adjust the settings below:', 'php-notifier' );
 
@@ -235,7 +235,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function send_email_callback() {
+	 function send_email_callback() {
 
 		printf(
 			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
@@ -249,7 +249,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	public function email_frequency_callback() {
+	 function email_frequency_callback() {
 
 		$options = array(
 			'never'   => __( 'Never', 'php-notifier' ),
