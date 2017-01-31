@@ -37,11 +37,11 @@ class PHP_Notifier_Settings {
 
 		$this->php_version_error = $php_version_error;
 
-		add_action( 'admin_menu', [ $this, 'add_plugin_page' ] );
+		add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
 
-		add_action( 'admin_init', [ $this, 'page_init' ] );
+		add_action( 'admin_init', array( $this, 'page_init' ) );
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'page_styles' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'page_styles' ) );
 
 	}
 
@@ -57,7 +57,7 @@ class PHP_Notifier_Settings {
 			__( 'PHP Notifier', 'php-notifier' ),
 			'manage_options',
 			'php-notifier',
-			[ $this, 'create_admin_page' ]
+			array( $this, 'create_admin_page' )
 		);
 
 	}
@@ -138,20 +138,20 @@ class PHP_Notifier_Settings {
 		register_setting(
 			'php_notifier_settings_group',
 			'php_notifier_settings',
-			[ $this, 'sanitize' ]
+			array( $this, 'sanitize' )
 		);
 
 		add_settings_section(
 			'setting_section_id',
 			__( 'General Settings', 'php-notifier' ),
-			[ $this, 'print_section_info' ],
+			array( $this, 'print_section_info' ),
 			'php-notifier'
 		);
 
 		add_settings_field(
 			'send_email',
 			esc_html__( 'Send Email Notification?', 'php-notifier' ),
-			[ $this, 'send_email_callback' ],
+			array( $this, 'send_email_callback' ),
 			'php-notifier',
 			'setting_section_id'
 		);
@@ -159,7 +159,7 @@ class PHP_Notifier_Settings {
 		add_settings_field(
 			'email_frequency',
 			esc_html__( 'Email Frequency', 'php-notifier' ),
-			[ $this, 'email_frequency_callback' ],
+			array( $this, 'email_frequency_callback' ),
 			'php-notifier',
 			'setting_section_id'
 		);
@@ -175,7 +175,7 @@ class PHP_Notifier_Settings {
 
 		$suffix = SCRIPT_DEBUG ? '' : '.min';
 
-		wp_enqueue_style( 'php-notifier-style', PHP_NOTIFIER_URL . "library/css/style{$suffix}.css", [], PHP_NOTIFIER_VERSION, 'all' );
+		wp_enqueue_style( 'php-notifier-style', PHP_NOTIFIER_URL . "library/css/style{$suffix}.css", array(), PHP_NOTIFIER_VERSION, 'all' );
 
 	}
 
@@ -232,12 +232,12 @@ class PHP_Notifier_Settings {
 	*/
 	public function email_frequency_callback() {
 
-		$options = [
+		$options = array(
 			'never'   => __( 'Never', 'php-notifier' ),
 			'daily'   => __( 'Daily', 'php-notifier' ),
 			'weekly'  => __( 'Weekly', 'php-notifier' ),
 			'monthly' => __( 'Monthly', 'php-notifier' ),
-		];
+		);
 
 		print( '<select name="php_notifier_settings[email_frequency]">' );
 
