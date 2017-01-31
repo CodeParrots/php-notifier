@@ -152,7 +152,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	function page_init() {
+	public function page_init() {
 
 		register_setting(
 			'php_notifier_settings_group',
@@ -190,7 +190,7 @@ public function send_email() {
 	 *
 	 * @since 1.0.0
 	 */
-	 function page_styles() {
+	 public function page_styles() {
 
 		$suffix = SCRIPT_DEBUG ? '' : '.min';
 
@@ -205,7 +205,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 function sanitize( $input ) {
+	 public function sanitize( $input ) {
 
 		$new_input = [];
 
@@ -224,7 +224,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 function print_section_info() {
+	 public function print_section_info() {
 
 		esc_html_e( 'Adjust the settings below:', 'php-notifier' );
 
@@ -235,7 +235,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 function send_email_callback() {
+	 public function send_email_callback() {
 
 		printf(
 			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
@@ -249,7 +249,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 function email_frequency_callback() {
+	 public function email_frequency_callback() {
 
 		$options = array(
 			'never'   => __( 'Never', 'php-notifier' ),
