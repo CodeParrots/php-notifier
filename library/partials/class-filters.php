@@ -34,7 +34,7 @@ final class PHP_Notifier_Filters {
 		}
 
 		return $footer_text . ' | ' . sprintf(
-			__( 'Your site is running PHP version %s.', 'php-notifier' ),
+			__( 'The server hosting your site is running PHP version %s.', 'php-notifier' ),
 			$this->php_version
 		);
 
