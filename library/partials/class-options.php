@@ -60,7 +60,7 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 					<?php
 
 						printf(
-							'<div class="notice notice-info"><p>%s</p></div>',
+							'<div class="notice notice-info is-dismissible"><p>%s</p></div>',
 							sprintf(
 								esc_html__( 'The PHP version running on this server: %s' ),
 								wp_kses_post( '<span class="php-version">' . self::$php_version . '</span>' )
