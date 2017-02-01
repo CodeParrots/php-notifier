@@ -11,21 +11,21 @@ class PHP_Notifier_Settings {
 	/**
 	 * Options
 	 *
-	 * @var 1.0.0
+	 * @var array
 	 */
 	private $options;
 
 	/**
 	 * PHP Version
 	 *
-	 * @var 1.0.0
+	 * @var string
 	 */
 	private $php_version;
 
 	/**
 	 * PHP Version Error
 	 *
-	 * @var 1.0.0
+	 * @var string
 	 */
 	private $php_version_error;
 
@@ -59,32 +59,6 @@ class PHP_Notifier_Settings {
 			'php-notifier',
 			array( $this, 'create_admin_page' )
 		);
-
-	}
-
-	/**
-	 * Send the PHP info email.
-	 *
-	 * @return bool
-	 */
-	public function email_cron() {
-
-		if ( ! $this->options['send_email'] ) {
-
-			return;
-
-		}
-
-		$error_message = ! $this->php_version_error ? sprintf( __( '%s You are running a supported version of PHP.', 'php-notifier' ), '☑' ) : '☒ ' . wp_strip_all_tags( $this->php_version_error );
-
-		$message = sprintf(
-			'The version of PHP running on the server hosting %1$s is PHP  %2$s.' . "\r\n\r\n" . '%3$s',
-			esc_html( get_site_url() ),
-			esc_html( $this->php_version ),
-			esc_html( $error_message )
-		);
-
-		wp_mail( get_option( 'admin_email' ), 'PHP Notifier Update', $message );
 
 	}
 
@@ -194,7 +168,19 @@ class PHP_Notifier_Settings {
 		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
 		$new_input['email_frequency']  = isset( $input['email_frequency'] ) ? sanitize_text_field( $input['email_frequency'] ) : 'Never';
 
-		$this->email_cron();
+		if ( $this->options['email_frequency'] !== $input['email_frequency'] ) {
+
+			wp_clear_scheduled_hook( 'php_notifier_email_cron' );
+
+			if ( ! $this->options['email_frequency'] ) {
+
+				return;
+
+			}
+
+			wp_schedule_event( time(), $new_input['email_frequency'], 'php_notifier_email_cron' );
+
+		}
 
 		return $new_input;
 

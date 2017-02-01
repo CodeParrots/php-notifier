@@ -66,6 +66,10 @@ class CP_PHP_Notifier {
 
 		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-filters.php' );
 
+		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-email-cron.php' );
+
+		register_activation_hook( __FILE__, array( $this, 'plugin_activation' ) );
+
 	}
 
 	/**
@@ -292,6 +296,23 @@ class CP_PHP_Notifier {
 		}
 
 		return $php_version_info;
+
+	}
+
+	/**
+	 * Plugin Activation
+	 *
+	 * @since 1.0.0
+	 */
+	public function plugin_activation() {
+
+		if ( wp_next_scheduled( 'cp_php_notifier_email' ) || ! $this->options['email_frequency'] ) {
+
+			return;
+
+		}
+
+		wp_schedule_event( time(), $this->options['email_frequency'], 'php_notifier_email_cron' );
 
 	}
 
