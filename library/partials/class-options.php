@@ -13,23 +13,23 @@ class PHP_Notifier_Settings {
 	 *
 	 * @var 1.0.0
 	 */
-private $options;
+	private $options;
 
 	/**
 	 * PHP Version
 	 *
 	 * @var 1.0.0
 	 */
-private $php_version;
+	private $php_version;
 
 	/**
 	 * PHP Version Error
 	 *
 	 * @var 1.0.0
 	 */
-private $php_version_error;
+	private $php_version_error;
 
-public function __construct( $options, $php_version, $php_version_error ) {
+	public function __construct( $options, $php_version, $php_version_error ) {
 
 		$this->options = $options;
 
@@ -41,18 +41,16 @@ public function __construct( $options, $php_version, $php_version_error ) {
 
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 
-		add_action( 'php_notifier_email_hook' , array( $this, 'send_email' ) );
-
 		add_action( 'admin_enqueue_scripts', array( $this, 'page_styles' ) );
 
-}
+	}
 
 	/**
 	* Add options page
 	*
 	* @since 1.0.0
 	*/
-public function add_plugin_page() {
+	public function add_plugin_page() {
 
 		add_options_page(
 			__( 'PHP Notifier Settings', 'php-notifier' ),
@@ -62,57 +60,40 @@ public function add_plugin_page() {
 			array( $this, 'create_admin_page' )
 		);
 
-}
+	}
 
 	/**
 	 * Send the PHP info email.
 	 *
 	 * @return bool
 	 */
-public function email_cron() {
+	public function email_cron() {
 
-	if ( ! $this->options['send_email'] ) {
-
-			return;
-
-	}
-
-	if ( 'Never' == $this->options['email_frequency'] ) {
+		if ( ! $this->options['send_email'] ) {
 
 			return;
 
+		}
+
+		$error_message = ! $this->php_version_error ? sprintf( __( '%s You are running a supported version of PHP.', 'php-notifier' ), '☑' ) : '☒ ' . wp_strip_all_tags( $this->php_version_error );
+
+		$message = sprintf(
+			'The version of PHP running on the server hosting %1$s is PHP  %2$s.' . "\r\n\r\n" . '%3$s',
+			esc_html( get_site_url() ),
+			esc_html( $this->php_version ),
+			esc_html( $error_message )
+		);
+
+		wp_mail( get_option( 'admin_email' ), 'PHP Notifier Update', $message );
+
 	}
-
-	if ( wp_next_scheduled( 'php_notifier_email' ) !== '' || wp_next_scheduled( 'php_notifier_email' ) !== $this->options['email_frequency'] ) {
-
-			wp_schedule_event( time(), $this->options['send_email'], 'php_notifier_email_hook' );
-
-	}
-
-}
-
 
 	/**
 	* Options page callback
 	*
 	* @since 1.0.0
 	*/
-public function send_email() {
-	$message = sprintf(
-		'The version of PHP running on the server hosting %1$s is PHP  %2$s.' . "\r\n\r\n" . '%3$s',
-		esc_html( get_site_url() ),
-		esc_html( $this->php_version ),
-		esc_html( $error_message )
-	);
-
-	wp_mail( get_option( 'admin_email' ), 'PHP Notifier Update', $message );
-
-	/**
-	* Options page callback
-	*
-	* @since 1.0.0
-	*/
-	function create_admin_page() {
+	public function create_admin_page() {
 
 		?>
 
@@ -190,7 +171,7 @@ public function send_email() {
 	 *
 	 * @since 1.0.0
 	 */
-	 public function page_styles() {
+	public function page_styles() {
 
 		$suffix = SCRIPT_DEBUG ? '' : '.min';
 
@@ -205,7 +186,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 public function sanitize( $input ) {
+	public function sanitize( $input ) {
 
 		$new_input = [];
 
@@ -224,7 +205,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 public function print_section_info() {
+	public function print_section_info() {
 
 		esc_html_e( 'Adjust the settings below:', 'php-notifier' );
 
@@ -235,7 +216,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 public function send_email_callback() {
+	public function send_email_callback() {
 
 		printf(
 			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
@@ -249,7 +230,7 @@ public function send_email() {
 	*
 	* @since 1.0.0
 	*/
-	 public function email_frequency_callback() {
+	public function email_frequency_callback() {
 
 		$options = array(
 			'never'   => __( 'Never', 'php-notifier' ),
