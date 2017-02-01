@@ -39,7 +39,7 @@ class CP_PHP_Notifier {
 		define( 'PHP_NOTIFIER_URL',     plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
-		self::$php_version = phpversion();
+		self::$php_version = '5.4.0';
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
@@ -171,14 +171,45 @@ class CP_PHP_Notifier {
 
 		}
 
-		$type = 'error';
+		$type            = 'error';
+		$supported_until = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false;
+		$security_until  = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false;
+		$additional      = '';
+
+		if ( $supported_until ) {
+
+			$additional .= ( strtotime( 'now' ) > $supported_until ) ? sprintf(
+				'<p>' . __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) . '</p>',
+				esc_html( 'v' . self::$php_version ),
+				$supported_until
+			) : "\r\n\r\n" . sprintf(
+				'<p>' . __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' ) . '</p>',
+				esc_html( 'v' . self::$php_version ),
+				date( get_option( 'date_format' ), $supported_until )
+			);
+
+		}
+
+		if ( $security_until ) {
+
+			$additional .= ( strtotime( 'now' ) > $security_until ) ? sprintf(
+				'<p>' . __( 'PHP %1$s stopped receiving security updates on %2$s.', 'php-notifier' ) . '</p>',
+				esc_html( 'v' . self::$php_version ),
+				$security_until
+			) : "\r\n\r\n" . sprintf(
+				'<p>' . __( 'PHP %1$s will no longer receive security updates on %2$s.', 'php-notifier' ) . '</p>',
+				esc_html( 'v' . self::$php_version ),
+				date( get_option( 'date_format' ), $security_until )
+			);
+
+		}
 
 		switch ( self::$options['warning_type'] ) {
 
 			default:
 			case 'deprecated':
 
-				$message = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
+				$message    = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
 
 				break;
 
@@ -201,12 +232,14 @@ class CP_PHP_Notifier {
 		$notice = sprintf(
 			'<div class="notice notice-%1$s">
 				<p>%2$s</p>
+				%3$s
 			</div>',
 			$type,
 			sprintf(
 				$message,
 				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
-			)
+			),
+			wp_kses_post( $additional )
 		);
 
 		if ( $echo ) {
