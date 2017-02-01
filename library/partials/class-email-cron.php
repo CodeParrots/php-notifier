@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings Page
+ * Email cron functionality
  *
  * @since 1.0.0
  *
@@ -8,28 +8,9 @@
  */
 class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 
-	/**
-	 * Options
-	 *
-	 * @var array
-	 */
-	private $options;
+	public function __construct() {
 
-	/**
-	 * PHP Version Error
-	 *
-	 * @since string
-	 */
-	private $php_version_error;
-
-	public function __construct( $options, $php_version_error ) {
-
-		$this->options = $options;
-
-		$this->php_version_error = $php_version_error;
-
-		add_filter( 'cron_schedules', array( $this, 'custom_cron_schedules' ) );
-
+		add_filter( 'cron_schedules',          array( $this, 'custom_cron_schedules' ) );
 		add_action( 'php_notifier_email_cron', array( $this, 'email_cron' ) );
 
 	}
@@ -72,19 +53,23 @@ class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 	 */
 	public function email_cron() {
 
-		if ( ! $this->options['send_email'] ) {
+		$prevent_email_cron = get_option( 'php_notifier_prevent_cron', false );
+
+		if ( ! self::$options['send_email'] || $prevent_email_cron ) {
+
+			update_option( 'php_notifier_prevent_cron', false );
 
 			return;
 
 		}
 
-		$error_message = ! $this->php_version_error ? sprintf( __( '%s You are running a supported version of PHP.', 'php-notifier' ), '☑' ) : '☒ ' . wp_strip_all_tags( $this->php_version_error );
+		$error_message = ! $this->php_version_error( false ) ? sprintf( __( '%s You are running a supported version of PHP.', 'php-notifier' ), '☑' ) : '☒ ' . wp_strip_all_tags( $this->php_version_error( false ) );
 
 		$message = sprintf(
-			'The version of PHP running on the server hosting %1$s is PHP  %2$s.' . "\r\n\r\n" . '%3$s',
+			__( 'The version of PHP running on the server hosting %1$s is PHP  %2$s. %3$s', 'php-notifier' ),
 			esc_html( get_site_url() ),
 			esc_html( self::$php_version ),
-			esc_html( $error_message )
+			"\r\n\r\n" . esc_html( $error_message )
 		);
 
 		wp_mail( get_option( 'admin_email' ), __( 'PHP Notifier Update', 'php-notifier' ), $message );
@@ -93,4 +78,4 @@ class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 
 }
 
-$php_notifier_email_cron = new PHP_Notifier_Email_Cron( $this->options, $this->php_version_error( false ) );
+$php_notifier_email_cron = new PHP_Notifier_Email_Cron();

@@ -24,14 +24,14 @@ class CP_PHP_Notifier {
 	 *
 	 * @var array
 	 */
-	private $php_support_data;
+	protected $php_support_data;
 
 	/**
 	 * PHP Notifier Settings Array
 	 *
 	 * @var array
 	 */
-	private $options;
+	protected static $options;
 
 	public function __construct() {
 
@@ -43,7 +43,7 @@ class CP_PHP_Notifier {
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
-		$this->options = get_option( 'php_notifier_settings', [
+		self::$options = get_option( 'php_notifier_settings', [
 			'send_email'      => true,
 			'email_frequency' => 'monthly',
 			'warning_type'    => false,
@@ -69,6 +69,8 @@ class CP_PHP_Notifier {
 		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-email-cron.php' );
 
 		register_activation_hook( __FILE__, array( $this, 'plugin_activation' ) );
+
+		register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
 
 	}
 
@@ -144,15 +146,15 @@ class CP_PHP_Notifier {
 	 */
 	public function set_warning_type( $type = false ) {
 
-		if ( ! isset( $this->options['warning_type'] ) ) {
+		if ( ! isset( self::$options['warning_type'] ) ) {
 
 			return;
 
 		}
 
-		$this->options['warning_type'] = $type;
+		self::$options['warning_type'] = $type;
 
-		update_option( 'php_notifier_settings', $this->options );
+		update_option( 'php_notifier_settings', self::$options );
 
 	}
 
@@ -163,7 +165,7 @@ class CP_PHP_Notifier {
 	 */
 	public function php_version_error( $echo = true ) {
 
-		if ( ! $this->options['warning_type'] ) {
+		if ( ! self::$options['warning_type'] ) {
 
 			return;
 
@@ -171,7 +173,7 @@ class CP_PHP_Notifier {
 
 		$type = 'error';
 
-		switch ( $this->options['warning_type'] ) {
+		switch ( self::$options['warning_type'] ) {
 
 			default:
 			case 'deprecated':
@@ -306,13 +308,26 @@ class CP_PHP_Notifier {
 	 */
 	public function plugin_activation() {
 
-		if ( wp_next_scheduled( 'cp_php_notifier_email' ) || ! $this->options['email_frequency'] ) {
+		if ( wp_next_scheduled( 'cp_php_notifier_email' ) || ! self::$options['email_frequency'] ) {
 
 			return;
 
 		}
 
-		wp_schedule_event( time(), $this->options['email_frequency'], 'php_notifier_email_cron' );
+		update_option( 'php_notifier_prevent_cron', true );
+
+		wp_schedule_event( time(), self::$options['email_frequency'], 'php_notifier_email_cron' );
+
+	}
+
+	/**
+	 * Plugin Deactivation
+	 *
+	 * @since 1.0.0
+	 */
+	public function plugin_deactivation() {
+
+		wp_clear_scheduled_hook( 'php_notifier_email_cron' );
 
 	}
 

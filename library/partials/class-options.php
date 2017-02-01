@@ -9,29 +9,18 @@
 class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 	/**
-	 * Options
-	 *
-	 * @var array
-	 */
-	private $options;
-
-	/**
 	 * PHP Version Error
 	 *
 	 * @var string
 	 */
 	private $php_version_error;
 
-	public function __construct( $options, $php_version_error ) {
-
-		$this->options = $options;
+	public function __construct( $php_version_error ) {
 
 		$this->php_version_error = $php_version_error;
 
-		add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
-
-		add_action( 'admin_init', array( $this, 'page_init' ) );
-
+		add_action( 'admin_menu',            array( $this, 'add_plugin_page' ) );
+		add_action( 'admin_init',            array( $this, 'page_init' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'page_styles' ) );
 
 	}
@@ -155,19 +144,21 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 		$new_input = [];
 
-		$new_input['warning_type']     = $this->options['warning_type'];
+		$new_input['warning_type']     = self::$options['warning_type'];
 		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
 		$new_input['email_frequency']  = isset( $input['email_frequency'] ) ? sanitize_text_field( $input['email_frequency'] ) : 'Never';
 
-		if ( $this->options['email_frequency'] !== $input['email_frequency'] ) {
+		if ( self::$options['email_frequency'] !== $input['email_frequency'] ) {
 
 			wp_clear_scheduled_hook( 'php_notifier_email_cron' );
 
-			if ( ! $this->options['email_frequency'] ) {
+			if ( ! self::$options['email_frequency'] ) {
 
-				return;
+				return $new_input;
 
 			}
+
+			update_option( 'php_notifier_prevent_cron', true );
 
 			wp_schedule_event( time(), $new_input['email_frequency'], 'php_notifier_email_cron' );
 
@@ -197,7 +188,7 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 		printf(
 			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
-			checked( 1, $this->options['send_email'], false )
+			checked( 1, self::$options['send_email'], false )
 		);
 
 	}
@@ -223,7 +214,7 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 			printf(
 				'<option value="%1$s" %2$s>%3$s</option>',
 				esc_attr( $value ),
-				selected( $this->options['email_frequency'], $value ),
+				selected( self::$options['email_frequency'], $value ),
 				esc_html( $label )
 			);
 
@@ -236,6 +227,6 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->options, $this->php_version_error( false ) );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version_error( false ) );
 
 }
