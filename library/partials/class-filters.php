@@ -6,15 +6,11 @@
  *
  * @since 1.0.0
  */
-final class PHP_Notifier_Filters {
+final class PHP_Notifier_Filters extends CP_PHP_Notifier {
 
-	private $php_version;
+	public function __construct() {
 
-	public function __construct( $php_version ) {
-
-		$this->php_version = $php_version;
-
-		add_filter( 'admin_footer_text', [ $this, 'php_version_footer_text' ] );
+		add_filter( 'admin_footer_text', array( $this, 'php_version_footer_text' ) );
 
 	}
 
@@ -35,11 +31,11 @@ final class PHP_Notifier_Filters {
 
 		return $footer_text . ' | ' . sprintf(
 			__( 'The server hosting your site is running PHP version %s.', 'php-notifier' ),
-			$this->php_version
+			self::$php_version
 		);
 
 	}
 
 }
 
-$php_notifier_filters = new PHP_Notifier_Filters( $this->php_version );
+$php_notifier_filters = new PHP_Notifier_Filters();

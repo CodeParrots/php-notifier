@@ -17,7 +17,7 @@ class CP_PHP_Notifier {
 	 *
 	 * @var integer
 	 */
-	private $php_version;
+	protected static $php_version;
 
 	/**
 	 * PHP Support Data
@@ -39,7 +39,7 @@ class CP_PHP_Notifier {
 		define( 'PHP_NOTIFIER_URL',     plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
-		$this->php_version = phpversion();
+		self::$php_version = phpversion();
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
@@ -89,7 +89,7 @@ class CP_PHP_Notifier {
 		//  - Less than last PHP version supported
 		//  - Current time is greater than or equal to "Security Support Until"
 		if (
-			version_compare( $this->php_version, key( $this->php_support_data ), '<' ) ||
+			version_compare( self::$php_version, key( $this->php_support_data ), '<' ) ||
 			strtotime( 'now' ) >= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until']
 		) {
 
@@ -203,7 +203,7 @@ class CP_PHP_Notifier {
 			$type,
 			sprintf(
 				$message,
-				wp_kses_post( '<strong>v' . $this->php_version . '</strong>' )
+				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
 			)
 		);
 

@@ -6,7 +6,7 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHP_Notifier_Settings {
+class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 	/**
 	 * Options
@@ -16,24 +16,15 @@ class PHP_Notifier_Settings {
 	private $options;
 
 	/**
-	 * PHP Version
-	 *
-	 * @var string
-	 */
-	private $php_version;
-
-	/**
 	 * PHP Version Error
 	 *
 	 * @var string
 	 */
 	private $php_version_error;
 
-	public function __construct( $options, $php_version, $php_version_error ) {
+	public function __construct( $options, $php_version_error ) {
 
 		$this->options = $options;
-
-		$this->php_version = $php_version;
 
 		$this->php_version_error = $php_version_error;
 
@@ -83,7 +74,7 @@ class PHP_Notifier_Settings {
 							'<div class="notice notice-info"><p>%s</p></div>',
 							sprintf(
 								esc_html__( 'The PHP version running on this server: %s' ),
-								wp_kses_post( '<span class="php-version">' . $this->php_version . '</span>' )
+								wp_kses_post( '<span class="php-version">' . self::$php_version . '</span>' )
 							)
 						);
 
@@ -245,6 +236,6 @@ class PHP_Notifier_Settings {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->options, $this->php_version, $this->php_version_error( false ) );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->options, $this->php_version_error( false ) );
 
 }

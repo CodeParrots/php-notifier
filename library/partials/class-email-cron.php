@@ -6,7 +6,7 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHP_Notifier_Email_Cron {
+class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 
 	/**
 	 * Options
@@ -16,24 +16,15 @@ class PHP_Notifier_Email_Cron {
 	private $options;
 
 	/**
-	 * PHP Version
-	 *
-	 * @var string
-	 */
-	private $php_version;
-
-	/**
 	 * PHP Version Error
 	 *
 	 * @since string
 	 */
 	private $php_version_error;
 
-	public function __construct( $options, $php_version, $php_version_error ) {
+	public function __construct( $options, $php_version_error ) {
 
 		$this->options = $options;
-
-		$this->php_version = $php_version;
 
 		$this->php_version_error = $php_version_error;
 
@@ -92,7 +83,7 @@ class PHP_Notifier_Email_Cron {
 		$message = sprintf(
 			'The version of PHP running on the server hosting %1$s is PHP  %2$s.' . "\r\n\r\n" . '%3$s',
 			esc_html( get_site_url() ),
-			esc_html( $this->php_version ),
+			esc_html( self::$php_version ),
 			esc_html( $error_message )
 		);
 
@@ -102,4 +93,4 @@ class PHP_Notifier_Email_Cron {
 
 }
 
-$php_notifier_email_cron = new PHP_Notifier_Email_Cron( $this->options, $this->php_version, $this->php_version_error( false ) );
+$php_notifier_email_cron = new PHP_Notifier_Email_Cron( $this->options, $this->php_version_error( false ) );
