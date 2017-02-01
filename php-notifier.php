@@ -206,7 +206,6 @@ class CP_PHP_Notifier {
 
 		switch ( self::$options['warning_type'] ) {
 
-			default:
 			case 'deprecated':
 
 				$message    = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
@@ -224,6 +223,12 @@ class CP_PHP_Notifier {
 				$type = 'info';
 
 				$message = __( 'The version of PHP that you have installed (%s) will no longer be supported in 1 month or less. Please update now to avoid any security issues.', 'php-notifier' );
+
+				break;
+
+			default:
+
+				return;
 
 				break;
 
