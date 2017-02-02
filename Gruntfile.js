@@ -58,6 +58,55 @@ module.exports = function(grunt) {
       }
     },
 
+		replace: {
+			base_file: {
+				src: [ 'php-notifier.php' ],
+				overwrite: true,
+				replacements: [
+					{
+						from: /Version:     (.*)/,
+						to: "Version:     <%= pkg.version %>"
+					},
+					{
+						from: /define\(\s*'PHP_NOTIFIER_VERSION',\s*'(.*)'\s*\);/,
+						to: "define( 'PHP_NOTIFIER_VERSION', '<%= pkg.version %>' );"
+					}
+				]
+			},
+			readme_txt: {
+				src: [ 'readme.txt' ],
+				overwrite: true,
+				replacements: [
+					{
+						from: /Tested up to:      (.*)/,
+						to: "Tested up to:      <%= pkg.tested_up_to %>"
+					},
+					{
+						from: /Stable tag:        (.*)/,
+						to: "Stable tag:        <%= pkg.version %>"
+					}
+				]
+			},
+			readme_md: {
+				src: [ 'README.md' ],
+				overwrite: true,
+				replacements: [
+					{
+						from: /# PHP Notifier v(.*)/,
+						to: "# PHP Notifier v<%= pkg.version %>"
+					},
+					{
+						from: /\*\*Stable tag:\*\* (.*)/,
+						to: "\**Stable tag:** <%= pkg.version %> <br />"
+					},
+					{
+						from: /\*\*Tested up to:\*\* WordPress v(.*)/,
+						to: "\**Tested up to:** WordPress v<%= pkg.tested_up_to %> <br />"
+					}
+				]
+			}
+		},
+
 		// Generate a nice banner for our css/js files
 		usebanner: {
 	    taskName: {
@@ -121,15 +170,25 @@ module.exports = function(grunt) {
 			],
 		},
 
-		zip: {
-			'using-cwd': {
-				cwd: 'build/',
-				src: [
-					'build/**/*',
-					'! build/.DS_Store'
-				],
-				dest: 'build/php-notifier-v<%= pkg.version %>.zip'
-			}
+		compress: {
+		  main: {
+		    options: {
+		      archive: 'build/php-notifier-v<%= pkg.version %>.zip'
+		    },
+		    files: [
+		      {
+						cwd: 'build/php-notifier/',
+						dest: 'php-notifier/',
+						src: ['**']
+					}
+		    ]
+		  }
+		},
+
+		shell: {
+			docs: [
+				'git clone -b gh-pages https://github.com/CodeParrots/php-notifier.git documentation',
+			].join( '&&' )
 		}
 
 	});
@@ -140,10 +199,16 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks( 'grunt-banner' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-zip' );
+	grunt.loadNpmTasks( 'grunt-text-replace' );
+	grunt.loadNpmTasks( 'grunt-contrib-compress' );
+	grunt.loadNpmTasks( 'grunt-menu' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-shell' );
 
-	grunt.registerTask( 'default', [
+	grunt.registerTask( 'default', [ 'menu' ] );
+
+	// Run Grunt.js
+	grunt.registerTask( 'Run Grunt.js Tasks', 'Default grunt task.', [
 		'sass',
 		'postcss',
 		'cssmin',
@@ -151,11 +216,26 @@ module.exports = function(grunt) {
 		'watch',
 	] );
 
-	grunt.registerTask( 'build', [
-		'clean:build',
+	// Bump Version & Tested up to version
+	grunt.registerTask( 'Bump Version', 'Bump the version and tested up to version.', [
+		'replace',
+	] );
+
+	// Generate documentation into the /documentation/ directory
+	grunt.registerTask( 'Generate Documentation', 'Generate documentation into the /documentation/ directory.', [
+		'shell:docs',
+	] );
+
+	// Build Task
+	grunt.registerTask( 'Build Package', 'Build the package into the /build/ directory.', [
+		'sass',
+		'postcss',
+		'cssmin',
+		'usebanner',
+		'replace',
+		'clean',
 		'copy',
-		'zip',
-		'clean:zip',
+		'compress',
 	] );
 
 };
