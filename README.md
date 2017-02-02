@@ -1,4 +1,4 @@
-#### Documentation
+## PHP Notifier Documentation
 
 Welcome to the PHP Notifier documentation. Documentation can be found at https://codeparrots.github.io/php-notifier/
 
