@@ -8,3 +8,9 @@ License:           GPL-2.0
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
 PHP Notifier.
+
+<strong>Github:</strong>
+https://github.com/CodeParrots/php-notifier
+
+<strong>Documentation:</strong>
+https://codeparrots.github.io/php-notifier/

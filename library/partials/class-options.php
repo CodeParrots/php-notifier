@@ -6,31 +6,22 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHP_Notifier_Settings {
+class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 	/**
-	 * Options
+	 * PHP Version Error
 	 *
-	 * @var 1.0.0
+	 * @var string
 	 */
-	private $options;
+	private $php_version_error;
 
-	/**
-	 * PHP Version
-	 *
-	 * @var 1.0.0
-	 */
-	private $php_version;
+	public function __construct( $php_version_error ) {
 
-	public function __construct( $php_version ) {
+		$this->php_version_error = $php_version_error;
 
-		$this->php_version = $php_version;
-
-		add_action( 'admin_menu', [ $this, 'add_plugin_page' ] );
-
-		add_action( 'admin_init', [ $this, 'page_init' ] );
-
-		add_action( 'admin_enqueue_scripts', [ $this, 'page_styles' ] );
+		add_action( 'admin_menu',            array( $this, 'add_plugin_page' ) );
+		add_action( 'admin_init',            array( $this, 'page_init' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'page_styles' ) );
 
 	}
 
@@ -46,7 +37,7 @@ class PHP_Notifier_Settings {
 			__( 'PHP Notifier', 'php-notifier' ),
 			'manage_options',
 			'php-notifier',
-			[ $this, 'create_admin_page' ]
+			array( $this, 'create_admin_page' )
 		);
 
 	}
@@ -57,8 +48,6 @@ class PHP_Notifier_Settings {
 	* @since 1.0.0
 	*/
 	public function create_admin_page() {
-
-		$this->options = get_option( 'php_notifier_settings' );
 
 		?>
 
@@ -71,10 +60,10 @@ class PHP_Notifier_Settings {
 					<?php
 
 						printf(
-							'<div class="notice notice-info"><p>%s</p></div>',
+							'<div class="notice notice-info is-dismissible"><p>%s</p></div>',
 							sprintf(
 								esc_html__( 'The PHP version running on this server: %s' ),
-								wp_kses_post( '<span class="php-version">' . $this->php_version . '</span>' )
+								wp_kses_post( '<span class="php-version">' . self::$php_version . '</span>' )
 							)
 						);
 
@@ -103,28 +92,28 @@ class PHP_Notifier_Settings {
 		register_setting(
 			'php_notifier_settings_group',
 			'php_notifier_settings',
-			[ $this, 'sanitize' ]
+			array( $this, 'sanitize' )
 		);
 
 		add_settings_section(
 			'setting_section_id',
 			__( 'General Settings', 'php-notifier' ),
-			[ $this, 'print_section_info' ],
+			array( $this, 'print_section_info' ),
 			'php-notifier'
 		);
 
 		add_settings_field(
-			'php_notifier_send_email',
-			__( 'Send Email Notification?', 'php-notifier' ),
-			[ $this, 'php_notifier_send_email_callback' ],
+			'send_email',
+			esc_html__( 'Send Email Notification?', 'php-notifier' ),
+			array( $this, 'send_email_callback' ),
 			'php-notifier',
 			'setting_section_id'
 		);
 
 		add_settings_field(
-			'php_notifier_how_often',
-			__( 'How Often?<br />\'Never\', \'Daily\', \'Weekly\', \'Monthly\', \'On Update\',', 'php-notifier' ),
-			[ $this, 'php_notifier_how_often_callback' ],
+			'email_frequency',
+			esc_html__( 'Email Frequency', 'php-notifier' ),
+			array( $this, 'email_frequency_callback' ),
 			'php-notifier',
 			'setting_section_id'
 		);
@@ -140,7 +129,7 @@ class PHP_Notifier_Settings {
 
 		$suffix = SCRIPT_DEBUG ? '' : '.min';
 
-		wp_enqueue_style( 'php-notifier-style', PHP_NOTIFIER_URL . "library/css/style{$suffix}.css", [], PHP_NOTIFIER_VERSION, 'all' );
+		wp_enqueue_style( 'php-notifier-style', PHP_NOTIFIER_URL . "library/css/style{$suffix}.css", array(), PHP_NOTIFIER_VERSION, 'all' );
 
 	}
 
@@ -155,8 +144,25 @@ class PHP_Notifier_Settings {
 
 		$new_input = [];
 
-		$new_input['php_notifier_send_email'] = isset( $input['php_notifier_send_email'] ) ? absint( $input['php_notifier_send_email'] ) : '';
-		$new_input['php_notifier_how_often'] = empty( $input['php_notifier_how_often'] ) ? 'Never' : $input['php_notifier_how_often'];
+		$new_input['warning_type']     = self::$options['warning_type'];
+		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
+		$new_input['email_frequency']  = isset( $input['email_frequency'] ) ? sanitize_text_field( $input['email_frequency'] ) : 'Never';
+
+		if ( self::$options['email_frequency'] !== $input['email_frequency'] ) {
+
+			wp_clear_scheduled_hook( 'php_notifier_email_cron' );
+
+			if ( ! self::$options['email_frequency'] ) {
+
+				return $new_input;
+
+			}
+
+			update_option( 'php_notifier_prevent_cron', true );
+
+			wp_schedule_event( time(), $new_input['email_frequency'], 'php_notifier_email_cron' );
+
+		}
 
 		return $new_input;
 
@@ -178,11 +184,11 @@ class PHP_Notifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function php_notifier_send_email_callback() {
+	public function send_email_callback() {
 
 		printf(
-			'<input type="text" id="php_notifier_send_email" name="php_notifier_settings[php_notifier_send_email]" value="%s" />',
-			isset( $this->options['php_notifier_send_email'] ) ? esc_attr( $this->options['php_notifier_send_email'] ) : ''
+			'<input type="checkbox" id="send_email" name="php_notifier_settings[send_email]" value="1" %s />',
+			checked( 1, self::$options['send_email'], false )
 		);
 
 	}
@@ -192,18 +198,35 @@ class PHP_Notifier_Settings {
 	*
 	* @since 1.0.0
 	*/
-	public function php_notifier_how_often_callback() {
+	public function email_frequency_callback() {
 
-		printf(
-			'<input type="text" id="php_notifier_how_often" name="php_notifier_settings[php_notifier_how_often]" value="%s" />',
-			isset( $this->options['php_notifier_how_often'] ) ? esc_attr( $this->options['php_notifier_how_often'] ) : ''
+		$options = array(
+			'never'   => __( 'Never', 'php-notifier' ),
+			'daily'   => __( 'Daily', 'php-notifier' ),
+			'weekly'  => __( 'Weekly', 'php-notifier' ),
+			'monthly' => __( 'Monthly', 'php-notifier' ),
 		);
+
+		print( '<select name="php_notifier_settings[email_frequency]">' );
+
+		foreach ( $options as $value => $label ) {
+
+			printf(
+				'<option value="%1$s" %2$s>%3$s</option>',
+				esc_attr( $value ),
+				selected( self::$options['email_frequency'], $value ),
+				esc_html( $label )
+			);
+
+		}
+
+		print( '</select>' );
 
 	}
 }
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version );
+	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version_error( false ) );
 
 }
