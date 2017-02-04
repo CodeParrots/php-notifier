@@ -72,7 +72,7 @@ class CP_PHP_Notifier {
 
 		register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
 
-		// insert hook for dashboard notifications here
+		add_action( 'admin_notices', array( $this, 'dashboard_notifications' ) );
 
 	}
 
@@ -83,8 +83,28 @@ class CP_PHP_Notifier {
 	 */
 	public function dashboard_notifications() {
 
-		// check to see which notification is appropriate
-		// create new dashboard notification with warning text
+		// create new dashboard notification based on the warning_type by the current version of PHP
+		if ( self::$options['warning_type'] == 'deprecated' ) {
+			?>
+			<div class="update-nag notice is-dismissible">
+					<p> <img src="https://qph.ec.quoracdn.net/main-qimg-9c7723e302afb4d0063023eba3055e9e" width="24px"/> You are running PHP <?php echo self::$php_version; ?> which has been deprecated.  Please upgrade to a newer version of PHP.</p>
+			</div>
+			<?php
+		} else if (self::$options['warning_type'] == 'unsupported' ) {
+			?>
+			<div class="error notice is-dismissible">
+					<p> <img src="https://qph.ec.quoracdn.net/main-qimg-9c7723e302afb4d0063023eba3055e9e" width="24px"/> You are running PHP <?php echo self::$php_version; ?> which is not supported.  Upgrade to a newer version of PHP immediately.</p>
+			</div>
+			<?php
+		} else if (self::$options['warning_type'] == '' ) {
+			?>
+			<div class="updated notice is-dismissible">
+					<p> <img src="https://qph.ec.quoracdn.net/main-qimg-9c7723e302afb4d0063023eba3055e9e" width="24px"/> You are running PHP <?php echo self::$php_version; ?> which is supported.  You are running a current version of PHP.</p>
+			</div>
+			<?php
+		}
+
+
 	}
 
 	/**
