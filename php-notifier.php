@@ -72,6 +72,19 @@ class CP_PHP_Notifier {
 
 		register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
 
+		// insert hook for dashboard notifications here
+
+	}
+
+	/**
+	 * Based on the current version, create a dashboard notification
+	 *
+	 * @return mixed
+	 */
+	public function dashboard_notifications() {
+
+		// check to see which notification is appropriate
+		// create new dashboard notification with warning text
 	}
 
 	/**
