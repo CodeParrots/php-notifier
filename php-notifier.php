@@ -235,7 +235,7 @@ class CP_PHP_Notifier {
 		}
 
 		$notice = sprintf(
-			'<div class="notice notice-%1$s">
+			'<div class="notice notice-%1$s is-dismissible">
 				<p>%2$s</p>
 				%3$s
 			</div>',
