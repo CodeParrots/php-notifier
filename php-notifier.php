@@ -181,7 +181,7 @@ class CP_PHP_Notifier {
 			$additional .= ( strtotime( 'now' ) > $supported_until ) ? sprintf(
 				'<p>' . __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) . '</p>',
 				esc_html( 'v' . self::$php_version ),
-				$supported_until
+				date( get_option( 'date_format' ), $supported_until )
 			) : "\r\n\r\n" . sprintf(
 				'<p>' . __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' ) . '</p>',
 				esc_html( 'v' . self::$php_version ),
