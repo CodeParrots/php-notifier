@@ -227,6 +227,6 @@ class CP_PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 if ( is_admin() ) {
 
-	$cp_php_notifier_settings = new CP_PHP_Notifier_Settings( $this->php_version_error( false ) );
+	$cp_php_notifier_settings = new CP_PHP_Notifier_Settings( $this->get_php_error_message() );
 
 }

@@ -26,6 +26,17 @@ module.exports = function(grunt) {
 			}
 		},
 
+		// js minification
+    uglify: {
+      dist: {
+        files: {
+          'library/js/php-notifier-notices.min.js': [
+            '.dev/js/php-notifier-notices.js',
+          ],
+        }
+      }
+    },
+
     // Autoprefixer for our CSS files
     postcss: {
       options: {
@@ -125,6 +136,7 @@ module.exports = function(grunt) {
 	      files: {
 	        src: [
 						'library/css/*.min.css',
+						'library/js/*.min.js',
 					]
 	      }
 	    }
@@ -136,10 +148,21 @@ module.exports = function(grunt) {
         files: [
 					'.dev/sass/admin/*.scss',
 				],
-        tasks: [ 'sass', 'cssmin', 'usebanner'],
+        tasks: [ 'sass', 'cssmin', 'usebanner' ],
         options: {
           spawn: false,
-          event: ['all']
+          event: [ 'all' ]
+        },
+      },
+			js: {
+        files: [
+					'.dev/js/*.js',
+					'! .dev/js/*.min.js',
+				],
+        tasks: [ 'uglify', 'usebanner', 'copy:js' ],
+        options: {
+          spawn: false,
+          event: [ 'all' ]
         },
       },
     },
@@ -157,6 +180,19 @@ module.exports = function(grunt) {
 							'readme.txt'
 						],
 						dest: 'build/php-notifier/',
+					},
+				],
+			},
+			js: {
+				files: [
+					{
+						expand: true,
+						flatten: true,
+						filter: 'isFile',
+						src: [
+							'.dev/js/php-notifier-notices.js',
+						],
+						dest: 'library/js',
 					},
 				],
 			},
@@ -179,7 +215,7 @@ module.exports = function(grunt) {
 		      {
 						cwd: 'build/php-notifier/',
 						dest: 'php-notifier/',
-						src: ['**']
+						src: [ '**' ]
 					}
 		    ]
 		  }
@@ -194,6 +230,7 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadNpmTasks( 'grunt-contrib-sass' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-banner' );
@@ -212,6 +249,8 @@ module.exports = function(grunt) {
 		'sass',
 		'postcss',
 		'cssmin',
+		'uglify',
+		'copy:js',
 		'usebanner',
 		'watch',
 	] );
@@ -231,10 +270,12 @@ module.exports = function(grunt) {
 		'sass',
 		'postcss',
 		'cssmin',
+		'uglify',
+		'copy:js',
 		'usebanner',
 		'replace',
 		'clean',
-		'copy',
+		'copy:main',
 		'compress',
 	] );
 
