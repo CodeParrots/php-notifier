@@ -36,6 +36,8 @@ class CP_PHP_Notifier {
 	public function __construct() {
 
 		define( 'PHP_NOTIFIER_PATH',    plugin_dir_path( __FILE__ ) );
+		define( 'php_notifier_notice', 0 );
+		define( 'php_notifier_last_version', 0 );
 		define( 'PHP_NOTIFIER_URL',     plugin_dir_url( __FILE__ ) );
 		define( 'PHP_NOTIFIER_VERSION', '1.0.0' );
 
@@ -72,7 +74,30 @@ class CP_PHP_Notifier {
 
 		register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
 
+		$this->version_check();
+
 	}
+
+	/**
+	 * Cross check the installed PHP version with PHP.net support versions
+	 *
+	 * @return mixed
+	 */
+	 public function version_check()
+	 {
+		 // wp_die( intval( self::$options['php_notifier_last_version'] ) . ' and ' . intval( self::$php_version ) );
+
+		 if ( intval( self::$options['php_notifier_last_version'] ) !== intval( self::$php_version ) ) {
+
+			 wp_die( self::$options['php_notifier_last_version'] . ' is not equal to ' . self::$php_version );
+
+			 self::$options['php_notifier_notice'] = 0;
+
+			 self::$options['php_notifier_last_version'] = self::$php_version;
+
+		 }
+
+	 }
 
 	/**
 	 * Cross check the installed PHP version with PHP.net support versions
@@ -235,7 +260,7 @@ class CP_PHP_Notifier {
 		}
 
 		$notice = sprintf(
-			'<div class="notice notice-%1$s is-dismissible">
+			'<div class="notice notice-%1$s php_notifier_notice is-dismissible">
 				<p>%2$s</p>
 				%3$s
 			</div>',
@@ -247,7 +272,7 @@ class CP_PHP_Notifier {
 			wp_kses_post( $additional )
 		);
 
-		if ( $echo ) {
+		if ( $echo && get_option( 'php_notifier_notice-dismissed' ) === 0 ) {
 
 			echo $notice;
 
