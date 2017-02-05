@@ -43,11 +43,11 @@ class CP_PHP_Notifier {
 
 		$this->php_support_data = $this->php_notifier_version_info();
 
-		self::$options = get_option( 'php_notifier_settings', [
+		self::$options = get_option( 'php_notifier_settings', array(
 			'send_email'      => true,
 			'email_frequency' => 'monthly',
 			'warning_type'    => false,
-		] );
+		) );
 
 		$this->init();
 
@@ -60,7 +60,7 @@ class CP_PHP_Notifier {
 	 */
 	public function init() {
 
-		add_action( 'admin_init', [ $this, 'php_notifier_cross_check_data' ] );
+		add_action( 'admin_init', array( $this, 'php_notifier_cross_check_data' ) );
 
 		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-options.php' );
 
@@ -172,6 +172,7 @@ class CP_PHP_Notifier {
 		}
 
 		$type            = 'error';
+		$dismissible     = true;
 		$supported_until = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false;
 		$security_until  = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false;
 		$additional      = '';
@@ -208,20 +209,21 @@ class CP_PHP_Notifier {
 
 			case 'deprecated':
 
-				$message    = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
+				$dismissible = false;
+				$message     = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
 
 				break;
 
 			case 'unsupported':
 
+				$type    = 'warning';
 				$message = __( 'You are running PHP %s, which is no longer actively supported. It will still receive security updates, but its recommended that you upgrade your version of PHP.', 'php-notifier' );
 
 				break;
 
 			case 'deprecated-soon':
 
-				$type = 'info';
-
+				$type    = 'info';
 				$message = __( 'The version of PHP that you have installed (%s) will no longer be supported in 1 month or less. Please update now to avoid any security issues.', 'php-notifier' );
 
 				break;
@@ -235,11 +237,12 @@ class CP_PHP_Notifier {
 		}
 
 		$notice = sprintf(
-			'<div class="notice notice-%1$s is-dismissible">
-				<p>%2$s</p>
-				%3$s
+			'<div class="notice notice-%1$s %2$s">
+				<p>%3$s</p>
+				%4$s
 			</div>',
 			$type,
+			$dismissible ? 'is-dismissible' : '',
 			sprintf(
 				$message,
 				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
@@ -293,7 +296,7 @@ class CP_PHP_Notifier {
 
 			$tr = $dom->getElementsByTagName( 'tr' );
 
-			$column_text = [];
+			$column_text = array();
 
 			$x = 1;
 
@@ -315,17 +318,17 @@ class CP_PHP_Notifier {
 
 			unset( $column_text[3] );
 
-			$php_version_info = [];
+			$php_version_info = array();
 
 			$y = 0;
 
 			foreach ( $column_text as $php_info ) {
 
-				$php_version_info[ $php_info[0] ] = [
+				$php_version_info[ $php_info[0] ] = array(
 					'released'        => strtotime( $php_info[1] ),
 					'supported_until' => strtotime( $php_info[3] ),
 					'security_until'  => strtotime( $php_info[5] ),
-				];
+				);
 
 				$y++;
 

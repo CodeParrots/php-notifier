@@ -142,7 +142,7 @@ class CP_PHP_Notifier_Settings extends CP_PHP_Notifier {
 	*/
 	public function sanitize( $input ) {
 
-		$new_input = [];
+		$new_input = array();
 
 		$new_input['warning_type']     = self::$options['warning_type'];
 		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
