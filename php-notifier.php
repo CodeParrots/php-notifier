@@ -206,50 +206,24 @@ class CP_PHP_Notifier {
 
 		}
 
-		$type            = 'error';
-		$dismissible     = 'deprecated' === self::$options['warning_type'] ? false : true;
-		$supported_until = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false;
-		$security_until  = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false;
-		$message         = $this->get_php_error_message();
-		$additional      = '';
+		$notice_array = array(
+			'type'            => $this->get_error_notice_class( self::$options['warning_type'] ),
+			'dismisslbe'      => 'deprecated' === self::$options['warning_type'] ? false : true,
+			'supported_until' => isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false,
+			'security_until'  => isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false,
+			'message'         => $this->get_php_error_message(),
+			'additional'      => '',
+		);
 
-		if ( $supported_until ) {
+		if ( $notice_array['supported_until'] ) {
 
-			$additional .= ( strtotime( 'now' ) > $supported_until ) ? sprintf(
-				'<p>' . __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				date( get_option( 'date_format' ), $supported_until )
-			) : "\r\n\r\n" . sprintf(
-				'<p>' . __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				date( get_option( 'date_format' ), $supported_until )
-			);
+			$notice_array['additional'] = $this->get_additional_notice_content( 'supported_until', $notice_array['supported_until'] );
 
 		}
 
-		if ( $security_until ) {
+		if ( $notice_array['security_until'] ) {
 
-			$additional .= ( strtotime( 'now' ) > $security_until ) ? sprintf(
-				'<p>' . __( 'PHP %1$s stopped receiving security updates on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				$security_until
-			) : "\r\n\r\n" . sprintf(
-				'<p>' . __( 'PHP %1$s will no longer receive security updates on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				date( get_option( 'date_format' ), $security_until )
-			);
-
-		}
-
-		if ( 'unsupported' === self::$options['warning_type'] ) {
-
-			$type = 'warning';
-
-		}
-
-		if ( 'deprecated-soon' === self::$options['warning_type'] ) {
-
-			$type = 'info';
+			$notice_array['additional'] = $this->get_additional_notice_content( 'security_until', $notice_array['security_until'] );
 
 		}
 
@@ -258,13 +232,13 @@ class CP_PHP_Notifier {
 				<p>%3$s</p>
 				%4$s
 			</div>',
-			$type,
-			$dismissible ? 'is-dismissible' : '',
+			$notice_array['type'],
+			$notice_array['dismissible'] ? 'is-dismissible' : '',
 			sprintf(
-				$message,
+				$notice_array['message'],
 				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
 			),
-			wp_kses_post( $additional )
+			wp_kses_post( $notice_array['additional'] )
 		);
 
 	}
@@ -283,6 +257,60 @@ class CP_PHP_Notifier {
 		wp_localize_script( 'php-notifier-notices', 'php_notifier', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 		) );
+
+	}
+
+	/**
+	 * Return the admin notice error class
+	 *
+	 * @param  string $warning_type The warning type to return.
+	 *
+	 * @return string
+	 */
+	public function get_error_notice_class( $warning_type ) {
+
+		$type_array = array(
+			'deprecated'      => 'error',
+			'deprecated-soon' => 'info',
+			'unsupported'     => 'warning',
+		);
+
+		return $type_array[ $warning_type ];
+
+	}
+
+	/**
+	 * Return the additional notice content
+	 *
+	 * @param  string $type      The type of additional notice to retrive supported|security
+	 * @param  string $timestamp The timestamp value to use in the comparison.
+	 *
+	 * @return mixed
+	 */
+	public function get_additional_notice_content( $type, $data ) {
+
+		switch ( $type ) {
+
+			default:
+			case 'supported_until':
+
+					$string = strtotime( 'now' ) > $notice_array['supported_until'] ? __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) : __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' );
+
+				break;
+
+			case 'security_until':
+
+				$string = strtotime( 'now' ) > $notice_array['security_until'] ? __( 'PHP %1$s stopped receiving security updates on %2$s.', 'php-notifier' ) : __( 'PHP %1$s will no longer receive security updates on %2$s.', 'php-notifier' );
+
+				break;
+
+		}
+
+		return sprintf(
+			'<p>' . esc_html( $string ) . '</p>',
+			esc_html( 'v' . self::$php_version ),
+			date( get_option( 'date_format' ), $notice_array[ $type ] )
+		);
 
 	}
 
