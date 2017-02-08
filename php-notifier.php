@@ -41,15 +41,46 @@ class CP_PHP_Notifier {
 
 		self::$php_version = phpversion();
 
-		$this->php_support_data = $this->php_notifier_version_info();
+		if ( version_compare( PHP_VERSION, '5.2.7', '<' ) ) {
 
-		self::$options = get_option( 'php_notifier_settings', [
+			add_action( 'admin_notices', array( $this, 'php_min_version_warning' ) );
+
+			return;
+
+		}
+
+		self::$options = get_option( 'php_notifier_settings', array(
 			'send_email'      => true,
 			'email_frequency' => 'monthly',
 			'warning_type'    => false,
-		] );
+			'dismiss_notice'  => false,
+			'php_version'     => self::$php_version,
+		) );
+
+		$this->php_support_data = $this->php_notifier_version_info();
 
 		$this->init();
+
+	}
+
+	/**
+	 * Display a notice back to the user about the minimum requirements for this plugin
+	 *
+	 * @return mixed
+	 *
+	 * @since 1.0.0
+	 */
+	public function php_min_version_warning() {
+
+		printf(
+			'<div class="notice php-notifier-notice notice-error">
+				<p>%s</p>
+			</div>',
+			sprintf(
+				esc_html__( 'PHP Notifier requires PHP version 5.2.7 or later. Your site is running %s. Please upgrade PHP to a later version or uninstall PHP notifier to remove this warning.', 'php-notifier' ),
+				PHP_VERSION
+			)
+		);
 
 	}
 
@@ -60,7 +91,20 @@ class CP_PHP_Notifier {
 	 */
 	public function init() {
 
-		add_action( 'admin_init', [ $this, 'php_notifier_cross_check_data' ] );
+		// abort if doing an ajax request
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+
+			add_action( 'wp_ajax_php_notifier_dismiss_notice', array( $this, 'dismiss_admin_notice' ) );
+
+			return;
+
+		}
+
+		add_action( 'admin_init', array( $this, 'php_notifier_cross_check_data' ) );
+
+		add_action( 'admin_notices', array( $this, 'php_version_error' ) );
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_notifier_notice_scrpits' ) );
 
 		include_once( plugin_dir_path( __FILE__ ) . '/library/partials/class-options.php' );
 
@@ -97,8 +141,6 @@ class CP_PHP_Notifier {
 
 			$this->set_warning_type( 'deprecated' );
 
-			$this->php_version_error();
-
 			return;
 
 		}
@@ -115,8 +157,6 @@ class CP_PHP_Notifier {
 
 				$this->set_warning_type( 'unsupported' );
 
-				$this->php_version_error();
-
 				return;
 
 			}
@@ -125,8 +165,6 @@ class CP_PHP_Notifier {
 			if ( strtotime( '+1 month' ) >= $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] ) {
 
 				$this->set_warning_type( 'deprecated-soon' );
-
-				$this->php_version_error();
 
 			}
 
@@ -146,12 +184,6 @@ class CP_PHP_Notifier {
 	 */
 	public function set_warning_type( $type = false ) {
 
-		if ( ! isset( self::$options['warning_type'] ) ) {
-
-			return;
-
-		}
-
 		self::$options['warning_type'] = $type;
 
 		update_option( 'php_notifier_settings', self::$options );
@@ -163,7 +195,135 @@ class CP_PHP_Notifier {
 	 *
 	 * @return mixed
 	 */
-	public function php_version_error( $echo = true ) {
+	public function php_version_error() {
+
+		if (
+			( ! isset( self::$options['warning_type'] ) || ! self::$options['warning_type'] )
+			|| self::$options['dismiss_notice']
+		) {
+
+			return;
+
+		}
+
+		$notice_array = array(
+			'type'            => $this->get_error_notice_class( self::$options['warning_type'] ),
+			'dismisslbe'      => 'deprecated' === self::$options['warning_type'] ? false : true,
+			'supported_until' => isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false,
+			'security_until'  => isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false,
+			'message'         => $this->get_php_error_message(),
+			'additional'      => '',
+		);
+
+		if ( $notice_array['supported_until'] ) {
+
+			$notice_array['additional'] = $this->get_additional_notice_content( 'supported_until', $notice_array['supported_until'] );
+
+		}
+
+		if ( $notice_array['security_until'] ) {
+
+			$notice_array['additional'] = $this->get_additional_notice_content( 'security_until', $notice_array['security_until'] );
+
+		}
+
+		printf(
+			'<div class="notice php-notifier-notice notice-%1$s %2$s">
+				<p>%3$s</p>
+				%4$s
+			</div>',
+			$notice_array['type'],
+			$notice_array['dismissible'] ? 'is-dismissible' : '',
+			sprintf(
+				$notice_array['message'],
+				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
+			),
+			wp_kses_post( $notice_array['additional'] )
+		);
+
+	}
+
+	/**
+	 * Enqueue the PHP notifier notice scripts
+	 *
+	 * @since 1.0.0
+	 */
+	public function enqueue_notifier_notice_scrpits() {
+
+		$suffix = SCRIPT_DEBUG ? '' : '.min';
+
+		wp_enqueue_script( 'php-notifier-notices', PHP_NOTIFIER_URL . "library/js/php-notifier-notices{$suffix}.js", array( 'jquery' ), PHP_NOTIFIER_VERSION, true );
+
+		wp_localize_script( 'php-notifier-notices', 'php_notifier', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+		) );
+
+	}
+
+	/**
+	 * Return the admin notice error class
+	 *
+	 * @param  string $warning_type The warning type to return.
+	 *
+	 * @return string
+	 */
+	public function get_error_notice_class( $warning_type ) {
+
+		$type_array = array(
+			'deprecated'      => 'error',
+			'deprecated-soon' => 'info',
+			'unsupported'     => 'warning',
+		);
+
+		return $type_array[ $warning_type ];
+
+	}
+
+	/**
+	 * Return the additional notice content
+	 *
+	 * @param  string $type      The type of additional notice to retrive supported|security
+	 * @param  string $timestamp The timestamp value to use in the comparison.
+	 *
+	 * @return mixed
+	 */
+	public function get_additional_notice_content( $type, $data ) {
+
+		switch ( $type ) {
+
+			default:
+			case 'supported_until':
+
+					$string = strtotime( 'now' ) > $notice_array['supported_until'] ? __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) : __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' );
+
+				break;
+
+			case 'security_until':
+
+				$string = strtotime( 'now' ) > $notice_array['security_until'] ? __( 'PHP %1$s stopped receiving security updates on %2$s.', 'php-notifier' ) : __( 'PHP %1$s will no longer receive security updates on %2$s.', 'php-notifier' );
+
+				break;
+
+		}
+
+		return sprintf(
+			'<p>' . esc_html( $string ) . '</p>',
+			esc_html( 'v' . self::$php_version ),
+			date( get_option( 'date_format' ), $notice_array[ $type ] )
+		);
+
+	}
+
+	/**
+	 * Return the PHP error message to use
+	 *
+	 * @param  string $warning_type The warning type to display.
+	 *
+	 * @return string
+	 *
+	 * @since 1.0.0
+	 */
+	public function get_php_error_message() {
 
 		if ( ! self::$options['warning_type'] ) {
 
@@ -171,91 +331,30 @@ class CP_PHP_Notifier {
 
 		}
 
-		$type            = 'error';
-		$supported_until = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['supported_until'] : false;
-		$security_until  = isset( $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ] ) ? $this->php_support_data[ PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ]['security_until'] : false;
-		$additional      = '';
-
-		if ( $supported_until ) {
-
-			$additional .= ( strtotime( 'now' ) > $supported_until ) ? sprintf(
-				'<p>' . __( 'PHP %1$s was officially no longer supported on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				$supported_until
-			) : "\r\n\r\n" . sprintf(
-				'<p>' . __( 'PHP %1$s will no longer be supported on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				date( get_option( 'date_format' ), $supported_until )
-			);
-
-		}
-
-		if ( $security_until ) {
-
-			$additional .= ( strtotime( 'now' ) > $security_until ) ? sprintf(
-				'<p>' . __( 'PHP %1$s stopped receiving security updates on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				$security_until
-			) : "\r\n\r\n" . sprintf(
-				'<p>' . __( 'PHP %1$s will no longer receive security updates on %2$s.', 'php-notifier' ) . '</p>',
-				esc_html( 'v' . self::$php_version ),
-				date( get_option( 'date_format' ), $security_until )
-			);
-
-		}
-
-		switch ( self::$options['warning_type'] ) {
-
-			case 'deprecated':
-
-				$message    = __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' );
-
-				break;
-
-			case 'unsupported':
-
-				$message = __( 'You are running PHP %s, which is no longer actively supported. It will still receive security updates, but its recommended that you upgrade your version of PHP.', 'php-notifier' );
-
-				break;
-
-			case 'deprecated-soon':
-
-				$type = 'info';
-
-				$message = __( 'The version of PHP that you have installed (%s) will no longer be supported in 1 month or less. Please update now to avoid any security issues.', 'php-notifier' );
-
-				break;
-
-			default:
-
-				return;
-
-				break;
-
-		}
-
-		$notice = sprintf(
-			'<div class="notice notice-%1$s is-dismissible">
-				<p>%2$s</p>
-				%3$s
-			</div>',
-			$type,
-			sprintf(
-				$message,
-				wp_kses_post( '<strong>v' . self::$php_version . '</strong>' )
-			),
-			wp_kses_post( $additional )
+		$warning_messages = array(
+			'deprecated'      => __( 'You are running PHP %s, which is deprecated and no longer supported. This is a major security issue and should be addressed immediately. It is highly recommended that you update the version of PHP on your hosting account.', 'php-notifier' ),
+			'deprecated-soon' => __( 'You are running PHP %s, which is no longer actively supported. It will still receive security updates, but its recommended that you upgrade your version of PHP.', 'php-notifier' ),
+			'unsupported'     => __( 'The version of PHP that you have installed (%s) will no longer be supported in 1 month or less. Please update now to avoid any security issues.', 'php-notifier' ),
 		);
 
-		if ( $echo ) {
+		return apply_filters( 'php_notifier_warning_message', $warning_messages[ self::$options['warning_type'] ], self::$options['warning_type'] );
 
-			echo $notice;
+	}
 
-			return;
+	/**
+	 * AJAX Handler for the dismissible notices
+	 *
+	 * @return boolean True|False based on if the option was updaed.
+	 *
+	 * @since 1.0.0
+	 */
+	public function dismiss_admin_notice() {
 
-		}
+		self::$options['dismiss_notice'] = true;
 
-		return $notice;
+		update_option( 'php_notifier_settings', self::$options );
+
+		wp_die();
 
 	}
 
@@ -263,16 +362,21 @@ class CP_PHP_Notifier {
 	 * Get the PHP verison info
 	 *
 	 * @return array
+	 *
+	 * @since 1.0.0
 	 */
 	public function php_notifier_version_info() {
 
-		if ( WP_DEBUG ) {
-
-			delete_transient( 'php_notifier_verison_info' );
-
-		}
-
 		if ( WP_DEBUG || false === ( $php_version_info = get_transient( 'php_notifier_verison_info' ) ) ) {
+
+			if ( phpversion() !== self::$options['php_version'] ) {
+
+				self::$options['dismiss_notice'] = false;
+				self::$options['php_version']    = phpversion();
+
+				update_option( 'php_notifier_settings', self::$options );
+
+			}
 
 			$contents = wp_remote_get( 'http://php.net/supported-versions.php' );
 
@@ -293,7 +397,7 @@ class CP_PHP_Notifier {
 
 			$tr = $dom->getElementsByTagName( 'tr' );
 
-			$column_text = [];
+			$column_text = array();
 
 			$x = 1;
 
@@ -315,17 +419,17 @@ class CP_PHP_Notifier {
 
 			unset( $column_text[3] );
 
-			$php_version_info = [];
+			$php_version_info = array();
 
 			$y = 0;
 
 			foreach ( $column_text as $php_info ) {
 
-				$php_version_info[ $php_info[0] ] = [
+				$php_version_info[ $php_info[0] ] = array(
 					'released'        => strtotime( $php_info[1] ),
 					'supported_until' => strtotime( $php_info[3] ),
 					'security_until'  => strtotime( $php_info[5] ),
-				];
+				);
 
 				$y++;
 

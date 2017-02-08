@@ -6,7 +6,7 @@
  *
  * @since 1.0.0
  */
-final class PHP_Notifier_Filters extends CP_PHP_Notifier {
+final class CP_PHP_Notifier_Filters extends CP_PHP_Notifier {
 
 	public function __construct() {
 
@@ -38,4 +38,4 @@ final class PHP_Notifier_Filters extends CP_PHP_Notifier {
 
 }
 
-$php_notifier_filters = new PHP_Notifier_Filters();
+$cp_php_notifier_filters = new CP_PHP_Notifier_Filters();
