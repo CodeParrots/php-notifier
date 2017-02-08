@@ -6,7 +6,7 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
+class CP_PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 
 	public function __construct() {
 
@@ -78,4 +78,4 @@ class PHP_Notifier_Email_Cron extends CP_PHP_Notifier {
 
 }
 
-$php_notifier_email_cron = new PHP_Notifier_Email_Cron();
+$cp_php_notifier_email_cron = new CP_PHP_Notifier_Email_Cron();

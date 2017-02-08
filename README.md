@@ -13,13 +13,39 @@ Notify users when the version of PHP running on their server has been or is abou
 
 `php_notifier_admin_footer_text`
 
+Description: Toggle on/off the additional admin footer text displaying the PHP version.
 Boolean: True or False
 Default: True
-Description: Toggle on/off the additional admin footer text displaying the PHP version.
 
 ```php
 /**
  * Turn off the admin footer text
  */
 add_filter( 'php_notifier_admin_footer_text', '__return_false' );
+```
+
+
+`php_notifier_warning_message`
+
+Description: Alter the PHP warning message displayed.
+Parameters:
+- `$message` - The warning message to be displayed.
+- `$warning_type` - The type used when displaying the warning message. (Warning types: deprecated, deprecated-soon, unsupported)
+
+```php
+/**
+ * Change the deprecated warning message
+ */
+function alter_deprecated_warning_message( $message, $warning_type ) {
+
+	if ( 'deprecated' === $warning_type ) {
+
+		return 'This is the new message that will be displayed.';
+
+	}
+
+	return $message;
+
+}
+add_filter( 'php_notifier_warning_message', 'alter_deprecated_warning_message', 10, 2 );
 ```

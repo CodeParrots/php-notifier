@@ -6,7 +6,7 @@
  *
  * @author Code Parrots <support@codeparrots.com>
  */
-class PHP_Notifier_Settings extends CP_PHP_Notifier {
+class CP_PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 	/**
 	 * PHP Version Error
@@ -142,7 +142,7 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 	*/
 	public function sanitize( $input ) {
 
-		$new_input = [];
+		$new_input = array();
 
 		$new_input['warning_type']     = self::$options['warning_type'];
 		$new_input['send_email']       = (bool) empty( $input['send_email'] ) ? false : true;
@@ -227,6 +227,6 @@ class PHP_Notifier_Settings extends CP_PHP_Notifier {
 
 if ( is_admin() ) {
 
-	$php_notifier_settings = new PHP_Notifier_Settings( $this->php_version_error( false ) );
+	$cp_php_notifier_settings = new CP_PHP_Notifier_Settings( $this->get_php_error_message() );
 
 }
